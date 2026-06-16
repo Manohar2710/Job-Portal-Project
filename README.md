@@ -10,7 +10,7 @@ You've just received a comprehensive learning plan to master Spring Boot + Angul
 
 You now have **5 comprehensive guides** totaling over 2,500 lines of content:
 
-1. **README-LEARNING-PLAN.md** - Start here! Overview and navigation
+1. **[`README-LEARNING-PLAN.md`](./README-LEARNING-PLAN.md)** - Start here! Overview and navigation
 2. **SENIOR-FULLSTACK-LEARNING-PLAN.md** - Phases 1-2 with architecture
 3. **SPRING-BOOT-ADVANCED-GUIDE.md** - Phases 3-6 (Security, Caching, Async, APIs)
 4. **ANGULAR-ADVANCED-GUIDE.md** - Phases 10-11 (State Management, Advanced Patterns)
