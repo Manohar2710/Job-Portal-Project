@@ -13,4 +13,6 @@ spring:
         hibernate:
             ddl-auto: validate
         show-sql: true
-        open-in-view: false
+        open-in-view: false # OpenInView set with false as with true/default 
+        # springboot will keep the db session open for every http request 
+        # even during data serializationn  
