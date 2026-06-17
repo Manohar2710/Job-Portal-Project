@@ -8,7 +8,6 @@ import com.learning.job_portal_service.entity.Job;
 import com.learning.job_portal_service.repository.JobRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 
 @Service
 @RequiredArgsConstructor
