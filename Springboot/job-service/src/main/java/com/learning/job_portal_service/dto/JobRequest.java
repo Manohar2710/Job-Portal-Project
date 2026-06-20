@@ -7,7 +7,8 @@ import jakarta.validation.constraints.NotNull;
 
 
 public record JobRequest (
-    @NotBlank String title,
+    @NotBlank(message = "Job title is required and cannot be blank")
+    String title,
     @NotBlank String description,
     @NotBlank String location,
     @NotNull JobStatus status,

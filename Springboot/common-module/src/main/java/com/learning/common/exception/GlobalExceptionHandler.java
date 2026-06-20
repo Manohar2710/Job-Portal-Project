@@ -1,9 +1,8 @@
-package com.learning.job_portal_service.exception;
+package com.learning.common.exception;
 
 import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
