@@ -12,6 +12,7 @@
     "isolatedModules": true,
     "experimentalDecorators": true,
     "paths": {
+      "auth-feature": ["./dist/auth-feature"],
       "shared-ui": ["./dist/shared-ui"]
     },
     "importHelpers": true,
@@ -43,6 +44,12 @@
     },
     {
       "path": "./projects/shared-ui/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/auth-feature/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/auth-feature/tsconfig.spec.json"
     }
   ]
 }

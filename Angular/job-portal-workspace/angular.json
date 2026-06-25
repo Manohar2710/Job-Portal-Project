@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "3a2c4bdb-43b8-4ca7-884c-42e4e4d49585"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -160,6 +161,32 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/shared-ui/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "auth-feature": {
+      "projectType": "library",
+      "root": "projects/auth-feature",
+      "sourceRoot": "projects/auth-feature/src",
+      "prefix": "auth",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/auth-feature/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/auth-feature/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/auth-feature/tsconfig.spec.json"
           }
         }
       }
