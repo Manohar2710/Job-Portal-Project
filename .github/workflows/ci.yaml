@@ -22,7 +22,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: ./Angular/job-portal-workspace/package-lock.json
 
-    - run: npm ci
+    - run: npm install
 
     # Example A: If using standard Angular Workspace architecture
     - name: Build Job Portal App
