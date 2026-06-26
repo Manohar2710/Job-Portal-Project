@@ -1,0 +1,27 @@
+name: Angular Monorepo CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Crucial: Fetches all git history to compare changes
+
+    - uses: actions/setup-node@v4
+      with: {node-version: '20', cache: 'npm'}
+
+    - run: npm ci
+
+    # Example A: If using standard Angular Workspace architecture
+    - name: Build Job Portal App
+      run: npx ng build job-portal-app --configuration=production
+
+    # Example B: If using Nx Monorepo architecture (Highly Recommended)
+    # - name: Build Only Changed Apps
+    #   run: npx nx affected:build --base=origin/main
