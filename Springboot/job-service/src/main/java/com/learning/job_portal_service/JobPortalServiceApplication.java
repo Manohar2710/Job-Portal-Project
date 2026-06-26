@@ -3,6 +3,13 @@ package com.learning.job_portal_service;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+* @SpringBootApplication includes 
+* @EnableAutoConfiguration, 
+* @ComponentScan and 
+* @Configuration Annotations
+*/
+
 @SpringBootApplication(scanBasePackages = {
     "com.learning.job_portal_service",
     "com.learning.common"
