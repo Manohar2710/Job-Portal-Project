@@ -16,3 +16,23 @@ spring:
         open-in-view: false # OpenInView set with false as with true/default 
         # springboot will keep the db session open for every http request 
         # even during data serializationn  
+
+security:
+    jwt:
+        secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970 # 256-bit Base64
+        expiration: 86400000 #24 hours in mili seconds
+        refesh-expiration: 604800000 # 7 days
+        issuer: job-portal-service
+    cors:
+        allowed-origins:
+        - http://localhost:4200
+        - http://localhost:3000
+        allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+        allowed-headers: "*"
+        allow-credentials: true
+        max-age: 3600
