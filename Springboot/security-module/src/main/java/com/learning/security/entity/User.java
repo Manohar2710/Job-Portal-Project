@@ -43,9 +43,9 @@ public class User implements UserDetails{
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-    @CreationTimestamp
-    private LocalDateTime updatedAt;
     @UpdateTimestamp
+    private LocalDateTime updatedAt;
+    @CreationTimestamp
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
     @Override
