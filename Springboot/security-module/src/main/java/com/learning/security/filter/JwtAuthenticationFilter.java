@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+// Usign once per request filter as we are using spring boot starter web dependency
+// we should use WebFilter if we have Spring webflux implemented
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
