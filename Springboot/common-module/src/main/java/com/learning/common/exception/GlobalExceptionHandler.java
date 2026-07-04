@@ -1,5 +1,6 @@
 package com.learning.common.exception;
 
+import java.nio.file.AccessDeniedException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +41,24 @@ public class GlobalExceptionHandler {
             "status", 400,
             "error", "Validation Failed",
             "fields", fieldErrors
+        ));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgException(IllegalArgumentException exception){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+            "timestamp", Instant.now(),
+            "message", exception.getMessage(),
+            "status", HttpStatus.INTERNAL_SERVER_ERROR
+        ));
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException accessDeniedException) {
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+            "timestamp", Instant.now(),
+            "message", "Access Denied",
+            "status", 403
         ));
     }
 }

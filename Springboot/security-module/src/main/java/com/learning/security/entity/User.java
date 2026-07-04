@@ -18,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,20 +35,46 @@ public class User implements UserDetails{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, unique = true)
     private String email;
+
     private String firstName;
+
     private String lastName;
+
     private String password;
+
     private String phone;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     private LocalDateTime lastLogin;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean accountNonExpired = true;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean accountNonLocked = true;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean credentialsNonExpired = true;
+    
+
+    // UserDetails contract
+    
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -62,9 +89,5 @@ public class User implements UserDetails{
     public String getPassword() {
         return password;
     }
-    
-
-    // UserDetails contract
-    
 
 }
