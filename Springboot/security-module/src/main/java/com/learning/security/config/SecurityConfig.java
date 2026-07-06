@@ -44,7 +44,12 @@ public class SecurityConfig {
             // 3. Route authorisation rules
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints — no token required
-                .requestMatchers("/api/auth/**")
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**"
+                )
                 .permitAll()
                 // Everything else requires a valid JWT
                 .anyRequest().authenticated()
