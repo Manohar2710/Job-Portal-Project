@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthControllerService, LoginRequest } from 'auth-api';
+import { AuthControllerService, LoginRequest } from '../../../../../../libs/job-portal-api';
 
 @Component({
   selector: 'app-home',

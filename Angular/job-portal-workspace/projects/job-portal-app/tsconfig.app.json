@@ -9,7 +9,7 @@
     "paths": {
       "auth-feature": ["../../dist/auth-feature"],
       "shared-ui": ["../../dist/shared-ui"],
-      "auth-api": ["../../libs/auth-api/index.ts"]
+      "auth-api": ["../../libs/job-portal-api/index.ts"]
     }
   },
   "include": ["src/**/*.ts"],
