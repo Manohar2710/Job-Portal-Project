@@ -14,8 +14,8 @@ export class HomeComponent {
     ngOnInit() {
       console.log("App ngOninit")
       let loginRequest : LoginRequest = {
-        email: "test@gmail.com",
-        password: "12345"
+        email: "testemail1@gmail.com",
+        password: "test_password"
       }
       this.authApi.login(loginRequest).subscribe( (res) =>
         console.log("response "+ res)
