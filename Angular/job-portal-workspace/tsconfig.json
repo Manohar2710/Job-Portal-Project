@@ -11,10 +11,6 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
-    "paths": {
-      "auth-feature": ["./dist/auth-feature"],
-      "shared-ui": ["./dist/shared-ui"]
-    },
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve"
@@ -40,16 +36,16 @@
       "path": "./projects/admin-portal/tsconfig.spec.json"
     },
     {
-      "path": "./projects/shared-ui/tsconfig.lib.json"
+      "path": "./libs/shared-ui/tsconfig.lib.json"
     },
     {
-      "path": "./projects/shared-ui/tsconfig.spec.json"
+      "path": "./libs/shared-ui/tsconfig.spec.json"
     },
     {
-      "path": "./projects/auth-feature/tsconfig.lib.json"
+      "path": "./libs/auth-feature/tsconfig.lib.json"
     },
     {
-      "path": "./projects/auth-feature/tsconfig.spec.json"
+      "path": "./libs/auth-feature/tsconfig.spec.json"
     }
   ]
 }

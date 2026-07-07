@@ -4,8 +4,13 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
-    "rootDir": "./src",
-    "types": []
+    "rootDir": "../../",
+    "types": [],
+    "paths": {
+      "auth-feature": ["../../dist/auth-feature"],
+      "shared-ui": ["../../dist/shared-ui"],
+      "auth-api": ["../../libs/job-portal-api/index.ts"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts"]
