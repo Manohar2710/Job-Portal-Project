@@ -177,8 +177,8 @@
     },
     "shared-ui": {
       "projectType": "library",
-      "root": "projects/shared-ui",
-      "sourceRoot": "projects/shared-ui/src",
+      "root": "libs/shared-ui",
+      "sourceRoot": "libs/shared-ui/src",
       "prefix": "ui",
       "architect": {
         "build": {
@@ -203,18 +203,18 @@
     },
     "auth-feature": {
       "projectType": "library",
-      "root": "projects/auth-feature",
-      "sourceRoot": "projects/auth-feature/src",
+      "root": "libs/auth-feature",
+      "sourceRoot": "libs/auth-feature/src",
       "prefix": "auth",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/auth-feature/tsconfig.lib.prod.json"
+              "tsConfig": "libs/auth-feature/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/auth-feature/tsconfig.lib.json"
+              "tsConfig": "libs/auth-feature/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -222,7 +222,7 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "projects/auth-feature/tsconfig.spec.json"
+            "tsConfig": "libs/auth-feature/tsconfig.spec.json"
           }
         }
       }

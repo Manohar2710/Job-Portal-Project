@@ -1,0 +1,11 @@
+// ============================================================
+//  shared-ui global stylesheet — single import point for apps
+//
+//  Usage in app styles.scss:
+//    @use 'path/to/libs/shared-ui/src/styles/index';
+// ============================================================
+
+@use 'tokens';   // loads _tokens.scss — defines :root vars
+@use 'reset';    // loads _reset.scss  — uses the vars above
+@use 'typography';   // _typography.scss — heading, description, text classes
+

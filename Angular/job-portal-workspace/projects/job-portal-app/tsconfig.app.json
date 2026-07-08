@@ -7,9 +7,9 @@
     "rootDir": "../../",
     "types": [],
     "paths": {
-      "auth-feature": ["../../dist/auth-feature"],
-      "shared-ui": ["../../dist/shared-ui"],
-      "auth-api": ["../../libs/job-portal-api/index.ts"]
+      "auth-feature": ["../../libs/auth-feature/src/public-api.ts"],
+      "shared-ui": ["../../libs/shared-ui/src/public-api.ts"],
+      "job-portal-api": ["../../libs/job-portal-api/index.ts"]
     }
   },
   "include": ["src/**/*.ts"],

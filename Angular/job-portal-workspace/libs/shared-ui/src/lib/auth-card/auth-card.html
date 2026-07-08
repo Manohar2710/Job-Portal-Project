@@ -1,0 +1,21 @@
+<div class="auth-page">
+  <div class="auth-card">
+
+    <!-- Logo slot -->
+    <div class="auth-card__logo">
+      <ng-content select="[slot=logo]" />
+    </div>
+
+    <!-- Heading -->
+    <div class="auth-card__header">
+      <h1 class="jp-heading-xl">{{ title }}</h1>
+      <p *ngIf="subTitle" class="jp-description">{{ subTitle }}</p>
+    </div>
+
+    <!-- Form body -->
+    <div class="auth-card__body">
+      <ng-content />
+    </div>
+
+  </div>
+</div>
