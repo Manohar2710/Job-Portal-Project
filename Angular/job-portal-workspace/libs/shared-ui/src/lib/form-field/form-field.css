@@ -1,0 +1,64 @@
+/* // ── Layout ────────────────────────────────────────────────────── */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  /* 0.25rem between label / input / error */
+  gap: var(--jp-space-xs);            
+}
+
+/* // ── Label ──────────────────────────────────────────────────────── */
+.form-field__label {
+  /* // Styles come from .jp-label in _typography.scss */
+  /* // Add only layout concerns here */
+  user-select: none;
+}
+
+/* // ── Input ──────────────────────────────────────────────────────── */
+.form-field__input {
+  width: 100%;
+  /* 0.5rem 1rem */
+  padding: var(--jp-space-sm) var(--jp-space-md);  
+  font-family: var(--jp-font);
+  font-size: var(--jp-font-size-base);
+  color: var(--jp-text);
+  background-color: var(--jp-surface);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius-sm);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: var(--jp-text-muted);
+  }
+
+  /* Focus ring — uses primary brand colour */
+  &:focus {
+    border-color: var(--jp-primary);
+    /* --jp-primary at 15% opacity */
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);   
+  }
+}
+
+/* // ── Error state ────────────────────────────────────────────────── */
+.form-field--error {
+
+  .form-field__input {
+    border-color: var(--jp-error-border);
+    background-color: var(--jp-error-bg);
+
+    &:focus {
+      border-color: var(--jp-error);
+      /* --jp-error at 15% */
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);  
+    }
+  }
+}
+
+/* // ── Error message ──────────────────────────────────────────────── */
+.form-field__error {
+  /* Colour & typography come from .jp-text-error in _typography.scss */
+  /* Only layout specifics here: */
+  display: flex;
+  align-items: center;
+  gap: var(--jp-space-xs);
+}
