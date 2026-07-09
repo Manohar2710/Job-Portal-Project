@@ -9,6 +9,6 @@ import { Component, Input } from '@angular/core';
 })
 export class AuthCard {
 
-  @Input() title: string = 'Test title';
-  @Input() subTitle: string = 'Test Sub title';
+  @Input() title: string = '';
+  @Input() subTitle: string = '';
 }

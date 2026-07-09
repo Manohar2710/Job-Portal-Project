@@ -1,3 +1,14 @@
 <ui-auth-card title="Sign In" subTitle="Enter Email and Password">
-    
+    <ui-form-field
+        label="Email"
+        type="email"
+        placeholder="you@example.com"
+        [control]="form.controls.email"
+    />
+    <ui-form-field
+        label="Password"
+        type="password"
+        placeholder="********"
+        [control]="form.controls.email"
+    />
 </ui-auth-card>
