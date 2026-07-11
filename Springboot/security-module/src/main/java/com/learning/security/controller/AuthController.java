@@ -19,8 +19,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
+@Slf4j
 @Tag(name = "Authentication", description = "Register and login endpoint")
 @RestController
 @RequestMapping("/api/auth")
@@ -38,7 +40,8 @@ public class AuthController {
         }
     )
     @PostMapping("/register")
-    public ResponseEntity<AuthReponse> register(@Valid @RequestBody RegisterRequest RegisterRequest){
+    public ResponseEntity<AuthReponse> register(@Valid @RequestBody RegisterRequest RegisterRequest) {
+        log.debug("POST /api/auth/register received");
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(RegisterRequest));
     }
 
@@ -51,6 +54,7 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<AuthReponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        log.debug("POST /api/auth/login received");
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 }

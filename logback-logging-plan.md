@@ -196,7 +196,7 @@ Add `log.info` / `log.debug` log statements to `JobService` for job lifecycle ev
 - `AuthController`: `Springboot/security-module/src/main/java/com/learning/security/controller/AuthController.java`
 
 ### Status
-`[ ] pending`
+`[x] done`
 
 ---
 
