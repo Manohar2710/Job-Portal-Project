@@ -9,7 +9,9 @@
     <!-- Heading -->
     <div class="auth-card__header">
       <h1 class="jp-heading-xl">{{ title }}</h1>
-      <p *ngIf="subTitle" class="jp-description">{{ subTitle }}</p>
+      @if (subTitle) {
+        <p  class="jp-description">{{ subTitle }}</p>
+      }
     </div>
 
     <!-- Form body -->

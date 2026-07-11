@@ -20,6 +20,14 @@ export class FormField {
   } 
 
   get errorMessage(): string {
-    return 'Invalid value.'
+    const errors = this.control?.errors;
+    if (!errors) return '';
+    if (errors['required']) return `${this.label} is required.`;
+    if (errors['email'])    return 'Please enter a valid email address.';
+    if (errors['minlength']) {
+      const min = errors['minlength'].requiredLength as number;
+      return `Must be at least ${min} characters.`;
+    }
+    return 'Invalid value.';
   }
 }

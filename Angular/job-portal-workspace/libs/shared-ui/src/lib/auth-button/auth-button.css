@@ -1,0 +1,54 @@
+/* ── Button shell ──────────────────────────────────────────────── */
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--jp-space-sm);
+  width: 100%;
+  padding: var(--jp-space-sm) var(--jp-space-md);
+  font-family: var(--jp-font);
+  font-size: var(--jp-font-size-base);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--jp-primary-text);
+  background-color: var(--jp-primary);
+  border: none;
+  border-radius: var(--jp-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  outline: none;
+
+  &:hover:not(:disabled) {
+    background-color: var(--jp-primary-hover);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Label — hidden visually while loading so width stays stable ── */
+.auth-btn--loading .auth-btn__label {
+  opacity: 0.75;
+}
+
+/* ── Spinner ───────────────────────────────────────────────────── */
+.auth-btn__spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: auth-btn-spin 0.7s linear infinite;
+}
+
+@keyframes auth-btn-spin {
+  to { transform: rotate(360deg); }
+}

@@ -10,6 +10,7 @@
     "types": [],
     "paths": {
       "shared-ui": ["../shared-ui/src/public-api.ts"],
+      "job-portal-api": ["../job-portal-api/index.ts"]
     }
   },
   "include": ["src/**/*.ts"],
