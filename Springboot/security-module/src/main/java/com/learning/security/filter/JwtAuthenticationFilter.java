@@ -18,12 +18,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-// Usign once per request filter as we are using spring boot starter web dependency
-// we should use WebFilter if we have Spring webflux implemented
+// Using OncePerRequestFilter as we are using spring-boot-starter-web dependency.
+// Use WebFilter instead if Spring WebFlux is ever added.
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -39,19 +41,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. Skip filter if header is absent or doesn't start with "Bearer "
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            log.debug("No Bearer token on request [{} {}] — skipping JWT filter",
+                    request.getMethod(), request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
-        // 3. Strip "Bearer " prefix to get the raw token
+
+        // 3. Strip "Bearer " prefix to get the raw token (value is never logged)
         final String jwt = authHeader.substring(BEARER_PREFIX.length());
 
         try {
             // 4. Extract username from token
             final String username = jwtService.extractUsername(jwt);
+
             // 5. Only authenticate if username is present and no auth is set yet
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 // 6. Load full UserDetails from the database
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
                 // 7. Validate the token against the loaded user
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     // 8. Build an authenticated token with granted authorities
@@ -68,14 +75,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     // 10. Store in SecurityContext so downstream filters/controllers see it
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.debug("JWT validated — user: '{}', URI: [{} {}]",
+                            username, request.getMethod(), request.getRequestURI());
                 }
             }
         } catch (JwtException ex) {
-           // Invalid / expired / tampered token — clear context and let 401 propagate
+            // Invalid / expired / tampered token — clear context and return 401
+            log.warn("Invalid JWT token on [{} {}]: {}",
+                    request.getMethod(), request.getRequestURI(), ex.getMessage());
             SecurityContextHolder.clearContext();
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
             return;
         }
+
         // 11. Continue the filter chain
         filterChain.doFilter(request, response);
     }

@@ -140,7 +140,7 @@ Add structured log statements to `JwtAuthenticationFilter` to make JWT validatio
 - `@Component` and `@RequiredArgsConstructor` already present
 
 ### Status
-`[ ] pending`
+`[x] done`
 
 ---
 
