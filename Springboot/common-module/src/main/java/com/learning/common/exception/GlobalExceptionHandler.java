@@ -11,12 +11,15 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleException(ResourceNotFoundException ex) {
+        log.warn("ResourceNotFoundException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
             "timestamp", Instant.now(),
             "message", ex.getMessage(),
@@ -36,6 +39,7 @@ public class GlobalExceptionHandler {
                 (a, b) -> a
             ));
 
+        log.warn("Validation failed on {}: {}", ex.getObjectName(), fieldErrors);
         return ResponseEntity.badRequest().body(Map.of(
             "timestamp", Instant.now(),
             "status", 400,
@@ -45,16 +49,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgException(IllegalArgumentException exception){
+    public ResponseEntity<Map<String, Object>> handleIllegalArgException(IllegalArgumentException exception) {
+        log.warn("IllegalArgumentException: {}", exception.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
             "timestamp", Instant.now(),
             "message", exception.getMessage(),
             "status", HttpStatus.INTERNAL_SERVER_ERROR
         ));
     }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException accessDeniedException) {
-        
+        log.warn("AccessDeniedException: {}", accessDeniedException.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
             "timestamp", Instant.now(),
             "message", "Access Denied",

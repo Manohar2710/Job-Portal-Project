@@ -167,7 +167,7 @@ Add `log.error` / `log.warn` calls to `GlobalExceptionHandler` so that every unh
 - Note: `handleIllegalArgException` currently returns `HttpStatus.INTERNAL_SERVER_ERROR` in the body but uses `HttpStatus.BAD_REQUEST` for the HTTP status — this is a pre-existing inconsistency, do not fix it in this task
 
 ### Status
-`[ ] pending`
+`[x] done`
 
 ---
 
