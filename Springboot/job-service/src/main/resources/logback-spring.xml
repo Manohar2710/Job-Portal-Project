@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--
+    ╔══════════════════════════════════════════════════════════════════════════╗
+    ║              job-portal-service  —  Logback Configuration               ║
+    ║                                                                          ║
+    ║  Profiles                                                                ║
+    ║    dev   → colored, human-readable console output                       ║
+    ║    prod  → structured single-line JSON console output (default)         ║
+    ║    debug → full framework trace for deep debugging (dev superset)       ║
+    ║                                                                          ║
+    ║  This file uses Spring Boot <springProfile> extensions which require    ║
+    ║  the "-spring" suffix on the filename.  Do NOT rename to logback.xml.  ║
+    ╚══════════════════════════════════════════════════════════════════════════╝
+    -->
+
+    <!-- ─── Shared Properties ─────────────────────────────────────────────── -->
+    <property name="APP_NAME"    value="job-portal-service"/>
+    <property name="LOG_CHARSET" value="UTF-8"/>
+
+    <!--
+        DEV APPENDER
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ %clr(…) → ANSI color codes (stripped automatically on non-TTY).    │
+        │ Pattern fields (left-to-right):                                     │
+        │   timestamp  thread  log-level  logger(30 chars max)  message  ex  │
+        └─────────────────────────────────────────────────────────────────────┘
+    -->
+    <appender name="CONSOLE_DEV" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>${LOG_CHARSET}</charset>
+            <pattern>
+                %clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        PROD APPENDER — structured JSON (one log event = one JSON line)
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ Uses Logback's native PatternLayoutEncoder + %replace to produce    │
+        │ valid single-line JSON.  No external libraries required.            │
+        │                                                                      │
+        │ Output fields per log event:                                        │
+        │   timestamp, level, thread, logger, message, exception, traceId    │
+        │                                                                      │
+        │ traceId is read from MDC ("traceId" key).  If Spring Cloud Sleuth  │
+        │ or Micrometer Tracing is added later, it populates this key         │
+        │ automatically.  Until then the field is present but empty.          │
+        └─────────────────────────────────────────────────────────────────────┘
+    -->
+    <appender name="CONSOLE_PROD" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>${LOG_CHARSET}</charset>
+            <!--
+                JSON template built with %replace to escape double-quotes in
+                the message and stack trace fields.  The trailing %n ensures
+                each event occupies exactly one line.
+            -->
+            <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","level":"%p","thread":"%replace(%t){'\"','\\\"'}","logger":"%replace(%logger{50}){'\"','\\\"'}","message":"%replace(%m){'\"','\\\"'}","exception":"%replace(%rootException{short}){'\"','\\\"'}","traceId":"%X{traceId:-}","app":"${APP_NAME}"}%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         PROFILE: dev
+         Human-readable colored output; all com.learning classes at DEBUG;
+         Hibernate SQL visible; Spring framework at INFO.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <springProfile name="dev">
+
+        <!-- Application code — full DEBUG visibility -->
+        <logger name="com.learning" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Hibernate SQL — visible in dev for query inspection -->
+        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Hibernate bind parameters — enable to see actual query values -->
+        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Spring framework — INFO to reduce noise, still see startup banners -->
+        <logger name="org.springframework" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- JWT library — INFO in dev (key generation / parsing errors visible) -->
+        <logger name="io.jsonwebtoken" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Root — INFO for everything else -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </root>
+
+    </springProfile>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         PROFILE: prod  (also active when no profile is set)
+         Structured JSON output; application code at INFO; framework noise
+         suppressed to WARN; no SQL logging.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <springProfile name="prod | default">
+
+        <!-- Application code — INFO to capture business events without DEBUG noise -->
+        <logger name="com.learning" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE_PROD"/>
+        </logger>
+
+        <!-- Hibernate SQL — WARN only (errors, not normal query traffic) -->
+        <logger name="org.hibernate.SQL" level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_PROD"/>
+        </logger>
+
+        <!-- Spring framework — WARN to suppress startup/config verbosity -->
+        <logger name="org.springframework" level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_PROD"/>
+        </logger>
+
+        <!-- JWT library — WARN (surface token errors, suppress info) -->
+        <logger name="io.jsonwebtoken" level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE_PROD"/>
+        </logger>
+
+        <!-- Flyway — INFO so migration events are always visible -->
+        <logger name="org.flywaydb" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE_PROD"/>
+        </logger>
+
+        <!-- Root — INFO for everything else -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_PROD"/>
+        </root>
+
+    </springProfile>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         PROFILE: debug
+         Full framework trace for deep local debugging.
+         WARNING: extremely verbose — never activate on production traffic.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <springProfile name="debug">
+
+        <!-- Application code — TRACE for maximum visibility -->
+        <logger name="com.learning" level="TRACE" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Hibernate — full SQL + bind parameters -->
+        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Spring Security filter chain — DEBUG to trace auth decisions -->
+        <logger name="org.springframework.security" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Spring Web MVC — DEBUG for request mapping, handler selection -->
+        <logger name="org.springframework.web" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- CommonsRequestLoggingFilter — must be DEBUG for request body logging -->
+        <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- JWT library — DEBUG for token parsing internals -->
+        <logger name="io.jsonwebtoken" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </logger>
+
+        <!-- Root — DEBUG for everything else -->
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </root>
+
+    </springProfile>
+
+</configuration>
