@@ -113,7 +113,7 @@ private String maskEmail(String email) {
 - Lombok `@Slf4j` generates `private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);`
 
 ### Status
-`[ ] pending`
+`[x] done`
 
 ---
 

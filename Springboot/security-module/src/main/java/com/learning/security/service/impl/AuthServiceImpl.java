@@ -1,5 +1,7 @@
 package com.learning.security.service.impl;
 
+import static com.learning.common.util.LogMaskingUtils.maskEmail;
+
 import com.learning.security.config.JwtProperties;
 import java.util.List;
 
@@ -18,7 +20,9 @@ import com.learning.security.service.AuthService;
 import com.learning.security.service.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -31,10 +35,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthReponse register(@Valid RegisterRequest registerRequest) {
-        // 1. logic to regect duplicate email
-        if(userRepository.findByEmail(registerRequest.email()).isPresent()) {
-            throw new IllegalArgumentException("Email Address Already Exists " + registerRequest.email() );
+        log.info("Register attempt for email: {}", maskEmail(registerRequest.email()));
+
+        // 1. logic to reject duplicate email
+        if (userRepository.findByEmail(registerRequest.email()).isPresent()) {
+            log.warn("Registration rejected — email already exists: {}", maskEmail(registerRequest.email()));
+            throw new IllegalArgumentException("Email Address Already Exists " + registerRequest.email());
         }
+
         // 2. build and persist new user
         User user = User.builder()
             .email(registerRequest.email())
@@ -46,7 +54,9 @@ public class AuthServiceImpl implements AuthService {
             .build();
 
         User savedUser = userRepository.save(user);
-        // 3. issue access token 
+        log.info("User registered successfully, userId: {}", savedUser.getId());
+
+        // 3. issue access token (token value is never logged)
         String accessToken = jwtService.generateToken(user);
         return buildResponse(savedUser, accessToken);
     }
@@ -75,16 +85,25 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthReponse login(@Valid LoginRequest loginRequest) {
-        // Delegation email validation to spring security authentication manager
-        // throws 401 authentication exception is wrong credentials
+        log.info("Login attempt for email: {}", maskEmail(loginRequest.email()));
+
+        // Delegate credential validation to Spring Security AuthenticationManager.
+        // Throws AuthenticationException (401) on wrong credentials.
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password())
         );
 
-        User user = userRepository.findByEmail(
-            loginRequest.email())
-                .orElseThrow(() -> new IllegalStateException("User not found for Email "+ loginRequest.email())
-            );
+        User user = userRepository.findByEmail(loginRequest.email())
+            .orElseThrow(() -> {
+                // Should never happen — AuthenticationManager already verified the user exists,
+                // but guard against a race condition (e.g. account deleted between auth and lookup).
+                log.warn("Post-auth user lookup failed for email: {}", maskEmail(loginRequest.email()));
+                return new IllegalStateException("User not found for Email " + loginRequest.email());
+            });
+
+        log.info("Login successful, userId: {}", user.getId());
+
+        // Issue access token (token value is never logged)
         String accessToken = jwtService.generateToken(user);
         return buildResponse(user, accessToken);
     }
