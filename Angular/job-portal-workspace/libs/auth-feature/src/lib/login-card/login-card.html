@@ -1,14 +1,25 @@
 <ui-auth-card title="Sign In" subTitle="Enter Email and Password">
-    <ui-form-field
-        label="Email"
-        type="email"
-        placeholder="you@example.com"
-        [control]="form.controls.email"
-    />
-    <ui-form-field
-        label="Password"
-        type="password"
-        placeholder="********"
-        [control]="form.controls.email"
-    />
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <ui-form-field
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            [control]="form.controls.email"
+        />
+        <ui-form-field
+            label="Password"
+            type="password"
+            placeholder="********"
+            [control]="form.controls.password"
+        />
+
+        @if (serverError) {
+            <p class="jp-text-error" role="alert">{{ serverError }}</p>
+        }
+
+        <ui-auth-button
+            label="Sign In"
+            [loading]="isLoading"
+        />
+    </form>
 </ui-auth-card>

@@ -1,0 +1,29 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jp-space-md);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: var(--jp-space-sm) var(--jp-space-md);
+  font-family: var(--jp-font);
+  font-size: var(--jp-font-size-base);
+  font-weight: 600;
+  color: var(--jp-primary-text);
+  background-color: var(--jp-primary);
+  border: none;
+  border-radius: var(--jp-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  margin-top: var(--jp-space-sm);
+
+  &:hover:not(:disabled) {
+    background-color: var(--jp-primary-hover);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
