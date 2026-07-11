@@ -12,8 +12,8 @@ spring:
     jpa:
         hibernate:
             ddl-auto: validate
-        show-sql: true
-        open-in-view: false # OpenInView set with false as with true/default 
+        show-sql: false  # SQL logging is handled by logback-spring.xml (org.hibernate.SQL logger)
+        open-in-view: false # OpenInView set with false as with true/default
         # springboot will keep the db session open for every http request 
         # even during data serializationn  
 
@@ -36,3 +36,20 @@ security:
         allowed-headers: "*"
         allow-credentials: true
         max-age: 3600
+
+# ─── Logging ──────────────────────────────────────────────────────────────────
+# These levels act as the baseline fallback.
+# logback-spring.xml <springProfile> blocks override them per active profile:
+#   dev   → com.learning=DEBUG, org.hibernate.SQL=DEBUG
+#   prod  → com.learning=INFO,  org.hibernate.SQL=WARN  (this file's values)
+#   debug → com.learning=TRACE, full framework trace
+logging:
+    level:
+        root: INFO
+        com.learning: DEBUG                          # always verbose for our code
+        org.springframework.web: WARN               # suppress Spring MVC noise
+        org.springframework.security: WARN          # suppress Security filter chain noise
+        org.hibernate.SQL: WARN                     # SQL off by default; dev profile enables it
+        org.hibernate.orm.jdbc.bind: WARN           # bind params off by default
+        org.flywaydb: INFO                          # migration events always visible
+        io.jsonwebtoken: WARN                       # JWT library internals suppressed

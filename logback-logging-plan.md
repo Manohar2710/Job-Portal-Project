@@ -70,7 +70,7 @@ Add a `logging:` block to `application.yaml` as a secondary safety net and to ex
 - `show-sql: true` currently at line 15
 
 ### Status
-`[ ] pending`
+`[x] done`
 
 ---
 
