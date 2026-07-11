@@ -8,15 +8,18 @@ import com.learning.job_portal_service.entity.Job;
 import com.learning.job_portal_service.repository.JobRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JobService {
 
     private final JobRepository jobRepository;
 
-	public JobResponse create(JobRequest jobRequest) {
-        
+    public JobResponse create(JobRequest jobRequest) {
+        log.info("Creating job with title: '{}'", jobRequest.title());
+
         Job job = new Job();
         job.setTitle(jobRequest.title());
         job.setDescription(jobRequest.description());
@@ -26,8 +29,9 @@ public class JobService {
         job.setStatus(jobRequest.status());
 
         Job savedJob = jobRepository.save(job);
+        log.info("Job created successfully, jobId: {}, title: '{}'", savedJob.getId(), savedJob.getTitle());
         return map(savedJob);
-	}
+    }
 
     private JobResponse map(Job savedJob) {
         return new JobResponse(
