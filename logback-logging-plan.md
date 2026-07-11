@@ -225,7 +225,7 @@ Spring Boot provides `CommonsRequestLoggingFilter` out of the box — configure 
 - `@Profile("debug")` ensures zero production overhead
 
 ### Status
-`[ ] pending`
+`[x] done`
 
 ---
 
