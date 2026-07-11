@@ -53,3 +53,6 @@ logging:
         org.hibernate.orm.jdbc.bind: WARN           # bind params off by default
         org.flywaydb: INFO                          # migration events always visible
         io.jsonwebtoken: WARN                       # JWT library internals suppressed
+        # Activated automatically by logback-spring.xml when profile=debug.
+        # Listed here for visibility — has no effect unless profile=debug is active.
+        org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
