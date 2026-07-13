@@ -50,7 +50,7 @@ public class AuthServiceImpl implements AuthService {
             .lastName(registerRequest.lastname())
             .password(passwordEncoder.encode(registerRequest.password()))
             .phone(registerRequest.phone())
-            .role(Role.ROLE_USER)
+            .role(registerRequest.role())
             .build();
 
         User savedUser = userRepository.save(user);

@@ -1,5 +1,7 @@
 package com.learning.security.dto;
 
+import com.learning.security.entity.Role;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,6 +23,8 @@ public record RegisterRequest(
     @Size(min = 8, message = "password must be atlead 8 characters")
     String password,
     @Schema(example = "+919999999999")
-    String phone
+    String phone,
+    @Schema(example = "ROLE_RECRUITER")
+    Role role
 ) {
 }

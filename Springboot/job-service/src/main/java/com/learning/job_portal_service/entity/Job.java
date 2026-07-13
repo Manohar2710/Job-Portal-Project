@@ -40,10 +40,10 @@ public class Job {
     private JobStatus status;
 
     @Column(nullable = false)
-    private BigDecimal SalaryMin;
+    private BigDecimal salaryMin;
 
     @Column(nullable = false)
-    private BigDecimal SalaryMax;
+    private BigDecimal salaryMax;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
