@@ -44,11 +44,12 @@
         │ valid single-line JSON.  No external libraries required.            │
         │                                                                      │
         │ Output fields per log event:                                        │
-        │   timestamp, level, thread, logger, message, exception, traceId    │
+        │   timestamp, level, thread, logger, message, exception,            │
+        │   traceId, spanId, app                                              │
         │                                                                      │
-        │ traceId is read from MDC ("traceId" key).  If Spring Cloud Sleuth  │
-        │ or Micrometer Tracing is added later, it populates this key         │
-        │ automatically.  Until then the field is present but empty.          │
+        │ traceId/spanId are read from MDC.  brave-context-slf4j             │
+        │ (via micrometer-tracing-bridge-brave) populates both keys           │
+        │ automatically on every sampled request.                             │
         └─────────────────────────────────────────────────────────────────────┘
     -->
     <appender name="CONSOLE_PROD" class="ch.qos.logback.core.ConsoleAppender">
@@ -58,8 +59,13 @@
                 JSON template built with %replace to escape double-quotes in
                 the message and stack trace fields.  The trailing %n ensures
                 each event occupies exactly one line.
+
+                traceId — constant for the entire request (across all services).
+                spanId  — unique per unit-of-work within that request (HTTP call,
+                          DB query, method).  Both are populated by brave-context-slf4j
+                          (transitive from micrometer-tracing-bridge-brave).
             -->
-            <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","level":"%p","thread":"%replace(%t){'\"','\\\"'}","logger":"%replace(%logger{50}){'\"','\\\"'}","message":"%replace(%m){'\"','\\\"'}","exception":"%replace(%rootException{short}){'\"','\\\"'}","traceId":"%X{traceId:-}","app":"${APP_NAME}"}%n</pattern>
+            <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","level":"%p","thread":"%replace(%t){'\"','\\\"'}","logger":"%replace(%logger{50}){'\"','\\\"'}","message":"%replace(%m){'\"','\\\"'}","exception":"%replace(%rootException{short}){'\"','\\\"'}","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}","app":"${APP_NAME}"}%n</pattern>
         </encoder>
     </appender>
 
