@@ -48,9 +48,19 @@ public class SecurityConfig {
                     "/api/auth/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
-                    "/v3/api-docs/**"
+                    "/v3/api-docs/**",
+                    // Actuator health/liveness/readiness probes — must be reachable without a token
+                    // (Kubernetes readiness/liveness probes do not send Authorization headers).
+                    // The management port (8081) is not exposed via the public ingress, so this
+                    // only widens access on the internal management interface.
+                    "/actuator/health",
+                    "/actuator/health/liveness",
+                    "/actuator/health/readiness",
+                    "/actuator/info"
                 )
                 .permitAll()
+                // All other actuator endpoints (metrics, prometheus) stay authenticated
+                .requestMatchers("/actuator/**").authenticated()
                 // Everything else requires a valid JWT
                 .anyRequest().authenticated()
             )

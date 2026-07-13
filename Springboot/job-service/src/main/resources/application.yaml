@@ -37,14 +37,29 @@ security:
         allow-credentials: true
         max-age: 3600
 
-# ─── Tracing ──────────────────────────────────────────────────────────────────
+# ─── Actuator & Tracing ───────────────────────────────────────────────────────
 # micrometer-tracing-bridge-brave populates MDC "traceId"/"spanId" on every
 # request.  Default sampling probability is 0.1 (10%); raise to 1.0 so every
 # request gets a traceId in logs.  Lower this in high-volume production if needed.
 management:
+    server:
+        port: 8081          # expose actuator on a separate port (not reachable via public ingress)
     tracing:
         sampling:
             probability: 1.0
+    endpoints:
+        web:
+            exposure:
+                include: health,info,metrics,prometheus
+            base-path: /actuator
+    endpoint:
+        health:
+            show-details: when-authorized   # full component details only for authenticated callers
+            probes:
+                enabled: true               # exposes /actuator/health/liveness and /actuator/health/readiness
+    metrics:
+        tags:
+            application: ${spring.application.name}  # label every metric with the service name
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 # These levels act as the baseline fallback.
