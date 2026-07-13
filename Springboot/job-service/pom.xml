@@ -30,6 +30,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
         <!-- Micrometer Tracing: Brave bridge + Logback MDC propagator.
              Populates MDC "traceId" / "spanId" keys automatically on every
              request, which feeds the "traceId" field in CONSOLE_PROD JSON. -->
