@@ -37,6 +37,15 @@ security:
         allow-credentials: true
         max-age: 3600
 
+# ─── Tracing ──────────────────────────────────────────────────────────────────
+# micrometer-tracing-bridge-brave populates MDC "traceId"/"spanId" on every
+# request.  Default sampling probability is 0.1 (10%); raise to 1.0 so every
+# request gets a traceId in logs.  Lower this in high-volume production if needed.
+management:
+    tracing:
+        sampling:
+            probability: 1.0
+
 # ─── Logging ──────────────────────────────────────────────────────────────────
 # These levels act as the baseline fallback.
 # logback-spring.xml <springProfile> blocks override them per active profile:
