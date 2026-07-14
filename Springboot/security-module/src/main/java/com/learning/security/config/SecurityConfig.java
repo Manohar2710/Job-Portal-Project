@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.learning.security.filter.JwtAuthenticationFilter;
 
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     // -----------------------------------------------------------------------
     // SecurityFilterChain — the core security policy
@@ -38,10 +40,12 @@ public class SecurityConfig {
         return http
         // 1. Disable CSRF — not needed for stateless JWT APIs
         .csrf(AbstractHttpConfigurer::disable)
-        // 2. Stateless session — Spring must never create an HttpSession
-        .sessionManagement(session -> 
+        // 2. Apply CORS policy from CorsConfigurationSource (security.cors.* in application.yaml)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource))
+        // 3. Stateless session — Spring must never create an HttpSession
+        .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // 3. Route authorisation rules
+            // 4. Route authorisation rules
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints — no token required
                 .requestMatchers(
@@ -64,9 +68,9 @@ public class SecurityConfig {
                 // Everything else requires a valid JWT
                 .anyRequest().authenticated()
             )
-            // 4. Plug in our DaoAuthenticationProvider
+            // 5. Plug in our DaoAuthenticationProvider
             .authenticationProvider(authenticationProvider())
-            // 5. Register JWT filter BEFORE the default username/password filter
+            // 6. Register JWT filter BEFORE the default username/password filter
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
         
