@@ -67,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(user);
         log.info("User registered successfully, userId: {}", savedUser.getId());
 
-        // 3. Issue access token + refresh token (values are never logged)
+        // 3. Issue access + refresh tokens (values are never logged)
         String accessToken = jwtService.generateToken(savedUser);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser);
         return buildResponse(savedUser, accessToken, refreshToken.getToken());
