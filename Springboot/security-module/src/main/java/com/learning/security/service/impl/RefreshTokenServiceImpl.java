@@ -10,13 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.learning.security.config.JwtProperties;
 import com.learning.security.entity.RefreshToken;
 import com.learning.security.entity.User;
-import com.learning.security.exception.SecurityExceptionHandler;
 import com.learning.security.exception.TokenRefreshException;
 import com.learning.security.repository.RefreshTokenRepository;
 import com.learning.security.service.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 
