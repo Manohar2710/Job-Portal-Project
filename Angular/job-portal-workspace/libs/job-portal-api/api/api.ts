@@ -1,7 +1,7 @@
-export * from './authController.service';
-import { AuthControllerService } from './authController.service';
-export * from './authController.serviceInterface';
+export * from './authentication.service';
+import { AuthenticationService } from './authentication.service';
+export * from './authentication.serviceInterface';
 export * from './jobController.service';
 import { JobControllerService } from './jobController.service';
 export * from './jobController.serviceInterface';
-export const APIS = [AuthControllerService, JobControllerService];
+export const APIS = [AuthenticationService, JobControllerService];

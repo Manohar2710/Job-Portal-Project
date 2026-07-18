@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthControllerService, LoginRequest } from '../../../../../../libs/job-portal-api';
+import { AuthenticationService, LoginRequest } from '../../../../../../libs/job-portal-api';
 
 @Component({
   selector: 'app-home',
@@ -8,7 +8,7 @@ import { AuthControllerService, LoginRequest } from '../../../../../../libs/job-
 })
 export class HomeComponent {
 
-    constructor(private authApi: AuthControllerService){
+    constructor(private authApi: AuthenticationService){
       
     }
     ngOnInit() {
