@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthCard, AuthButton, FormField } from 'shared-ui';
-import { AuthenticationService } from 'job-portal-api';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'auth-login-card',
@@ -11,9 +11,9 @@ import { AuthenticationService } from 'job-portal-api';
   styleUrl: './login-card.css',
 })
 export class LoginCard {
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthenticationService);
-  private router = inject(Router);
+  private fb          = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router      = inject(Router);
 
   isLoading = false;
   serverError: string | null = null;
