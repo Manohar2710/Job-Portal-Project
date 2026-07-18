@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.learning.security.dto.AuthReponse;
 import com.learning.security.dto.LoginRequest;
+import com.learning.security.dto.LogoutRequest;
+import com.learning.security.dto.RefreshTokenRequest;
 import com.learning.security.dto.RegisterRequest;
 import com.learning.security.service.AuthService;
 
@@ -23,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
-@Tag(name = "Authentication", description = "Register and login endpoint")
+@Tag(name = "Authentication", description = "Register, login, token refresh and logout endpoints")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -56,5 +58,39 @@ public class AuthController {
     public ResponseEntity<AuthReponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         log.debug("POST /api/auth/login received");
         return ResponseEntity.ok(authService.login(loginRequest));
+    }
+
+    @Operation(
+        summary = "Refresh access token",
+        description = "Exchange a valid refresh token for a new access token + rotated refresh token pair. "
+                    + "The old refresh token is invalidated immediately after use.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Tokens refreshed",
+                    content = @Content(schema = @Schema(implementation = AuthReponse.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error — refreshToken field is blank"),
+            @ApiResponse(responseCode = "401", description = "Refresh token not found or expired")
+        }
+    )
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthReponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        log.debug("POST /api/auth/refresh received");
+        return ResponseEntity.ok(authService.refresh(request));
+    }
+
+    @Operation(
+        summary = "Logout — invalidate refresh token",
+        description = "Deletes the refresh token from the server so it can never be used again. "
+                    + "The client must discard both the access token and refresh token after calling this endpoint.",
+        responses = {
+            @ApiResponse(responseCode = "204", description = "Logged out successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error — refreshToken field is blank"),
+            @ApiResponse(responseCode = "401", description = "Refresh token not found or already expired")
+        }
+    )
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request) {
+        log.debug("POST /api/auth/logout received");
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 }
