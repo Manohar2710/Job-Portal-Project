@@ -55,18 +55,24 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return savedRefreshToken;
     }
 
-    // Looks up the token in the database and checks wheather it has expired.
     /**
-    * <p><strong>Token rotation:</strong> if the token IS expired, it is immediately
+     * Looks up the token in the database and checks whether it has expired.
+     *
+     * <p><strong>Token rotation:</strong> if the token IS expired, it is immediately
      * deleted from the database before throwing, so it can never be replayed.
      * Callers that receive a valid (non-expired) token should follow up with
      * {@link #createRefreshToken(User)} to rotate to a fresh token.</p>
      *
+     * <p>{@code @Transactional} keeps the Hibernate session open so that the
+     * {@code user} association on the returned entity can be accessed by the
+     * caller without a {@code LazyInitializationException}.</p>
+     *
      * @param token the raw opaque token string from the client request
      * @return the {@link RefreshToken} entity, guaranteed to be non-expired
-     * @throws SecurityExceptionHandler if the token is not found or has expired
+     * @throws TokenRefreshException if the token is not found or has expired
      */
     @Override
+    @Transactional
     public RefreshToken verifyExpiration(String token) {
          RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> {

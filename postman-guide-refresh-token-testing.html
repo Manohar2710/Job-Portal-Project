@@ -1,0 +1,538 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Postman Guide — Refresh Token Testing</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 32px 16px 48px;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  h2 { font-size: 16px; font-weight: 700; margin: 32px 0 12px; color: #1f2328; }
+  h3 { font-size: 13px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; color: #57606a; }
+  p  { margin-bottom: 10px; color: #1f2328; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 28px; }
+
+  /* Step card */
+  .step {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f7f8fa;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #3b82d4;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-title { font-weight: 700; font-size: 15px; }
+  .step-method {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: .04em;
+  }
+  .method-post { background: #dbeafe; color: #1d4ed8; }
+
+  .step-body { padding: 16px; }
+
+  /* URL bar */
+  .url-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 13px;
+    color: #1f2328;
+    word-break: break-all;
+  }
+  .url-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 4px;
+  }
+
+  /* Code block */
+  pre {
+    background: #1f2328;
+    color: #e6edf3;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin-bottom: 12px;
+  }
+  .key   { color: #79c0ff; }
+  .str   { color: #a5d6ff; }
+  .cmt   { color: #8b949e; font-style: italic; }
+
+  /* Tabs row */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 14px;
+  }
+  .tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #57606a;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab.active {
+    color: #3b82d4;
+    border-bottom-color: #3b82d4;
+  }
+
+  /* Response badge */
+  .resp-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .badge-200 { background: #dcfce7; color: #166534; }
+  .badge-204 { background: #dcfce7; color: #166534; }
+  .badge-401 { background: #fee2e2; color: #991b1b; }
+  .badge-400 { background: #fef3c7; color: #92400e; }
+  .resp-desc { font-size: 12px; color: #57606a; }
+
+  /* Info callout */
+  .callout {
+    border-left: 3px solid #3b82d4;
+    background: #eff6ff;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    color: #1e40af;
+  }
+  .callout.warn {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+    color: #78350f;
+  }
+  .callout.success {
+    border-left-color: #22c55e;
+    background: #f0fdf4;
+    color: #14532d;
+  }
+
+  /* Script block */
+  .script-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .script-label span {
+    background: #7c5cd8;
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* Flow diagram */
+  .flow {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-arrow {
+    font-size: 16px;
+    color: #57606a;
+    margin: 0 6px;
+  }
+  .flow-note {
+    font-size: 11px;
+    color: #57606a;
+    margin-left: 8px;
+  }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13px; }
+  th { background: #f7f8fa; text-align: left; padding: 8px 12px; border: 1px solid #e5e7eb; font-weight: 700; color: #1f2328; }
+  td { padding: 8px 12px; border: 1px solid #e5e7eb; color: #1f2328; vertical-align: top; }
+  td code, th code { font-family: "SF Mono", "Fira Code", monospace; font-size: 12px; background: #f7f8fa; padding: 1px 4px; border-radius: 3px; }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 12px;
+    color: #57606a;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Testing Refresh Token in Postman</h1>
+  <p class="subtitle">Job Portal Service · Base URL: <code style="font-family:monospace;background:#f7f8fa;padding:1px 5px;border-radius:3px">http://localhost:8080</code></p>
+
+  
+  <div class="flow">
+    <h3 style="margin-bottom:14px">Full Token Lifecycle</h3>
+    <div class="flow-row">
+      <div class="flow-box">Register / Login</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:#3b82d4;color:#3b82d4">Save accessToken<br />+ refreshToken</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Call protected API</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:#f59e0b;color:#92400e">401 (token expired)</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px">
+      <div class="flow-arrow" style="visibility:hidden">→</div>
+      <div class="flow-box" style="border-color:#22c55e;color:#166534">POST /refresh<br />→ new tokens</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Retry API call</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">200 ✓</div>
+      <div class="flow-note">… or POST /logout to revoke</div>
+    </div>
+  </div>
+
+  
+  <h2>Step 1 — Set Up a Postman Environment</h2>
+  <p>Create an environment named <strong>job-portal-local</strong> with these variables. Postman scripts will auto-populate the token fields after each request.</p>
+  <table>
+    <tr><th>Variable</th><th>Initial value</th><th>Populated by</th></tr>
+    <tr><td><code>baseUrl</code></td><td><code>http://localhost:8080</code></td><td>You (manual)</td></tr>
+    <tr><td><code>accessToken</code></td><td><em>empty</em></td><td>Login / Register / Refresh scripts</td></tr>
+    <tr><td><code>refreshToken</code></td><td><em>empty</em></td><td>Login / Register / Refresh scripts</td></tr>
+  </table>
+  <div class="callout">
+    Set the environment as <strong>active</strong> (top-right dropdown in Postman) before running any request.
+  </div>
+
+  
+  <h2>Step 2 — Register or Login</h2>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2a</div>
+      <div class="step-title">Register a new user</div>
+      <div class="step-method method-post">POST</div>
+    </div>
+    <div class="step-body">
+      <div class="url-label">URL</div>
+      <div class="url-bar">{{baseUrl}}/api/auth/register</div>
+
+      <div class="tabs">
+        <div class="tab active">Body · raw · JSON</div>
+      </div>
+      <pre><span class="cmt">// Body → raw → JSON</span>
+{
+  <span class="key">"firstName"</span>: <span class="str">"Jane"</span>,
+  <span class="key">"lastname"</span>: <span class="str">"Doe"</span>,
+  <span class="key">"email"</span>: <span class="str">"jane@example.com"</span>,
+  <span class="key">"password"</span>: <span class="str">"Secret123!"</span>,
+  <span class="key">"phone"</span>: <span class="str">"0000000000"</span>,
+  <span class="key">"role"</span>: <span class="str">"ROLE_USER"</span>
+}</pre>
+
+      <div class="script-label"><span>Scripts</span> Tests tab (auto-saves tokens)</div>
+      <pre><span class="cmt">// Paste this in the Tests tab of the Register request</span>
+<span class="key">const</span> res = pm.response.json();
+pm.environment.set(<span class="str">"accessToken"</span>,  res.accessToken);
+pm.environment.set(<span class="str">"refreshToken"</span>, res.refreshToken);</pre>
+
+      <div class="resp-row">
+        <div class="badge badge-200">201 Created</div>
+        <div class="resp-desc">Both tokens are returned and saved to the environment automatically.</div>
+      </div>
+      <pre><span class="cmt">// Expected response body</span>
+{
+  <span class="key">"accessToken"</span>:  <span class="str">"eyJhbGci..."</span>,   <span class="cmt">// JWT — valid 24 h</span>
+  <span class="key">"refreshToken"</span>: <span class="str">"xK9mP2nQ..."</span>,   <span class="cmt">// opaque — valid 7 days</span>
+  <span class="key">"tokenType"</span>:    <span class="str">"Bearer"</span>,
+  <span class="key">"expiresIn"</span>:    <span class="str">86400000</span>,
+  <span class="key">"user"</span>: { ... }
+}</pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2b</div>
+      <div class="step-title">Login (existing user)</div>
+      <div class="step-method method-post">POST</div>
+    </div>
+    <div class="step-body">
+      <div class="url-label">URL</div>
+      <div class="url-bar">{{baseUrl}}/api/auth/login</div>
+
+      <div class="tabs"><div class="tab active">Body · raw · JSON</div></div>
+      <pre>{
+  <span class="key">"email"</span>:    <span class="str">"jane@example.com"</span>,
+  <span class="key">"password"</span>: <span class="str">"Secret123!"</span>
+}</pre>
+
+      <div class="script-label"><span>Scripts</span> Tests tab</div>
+      <pre><span class="key">const</span> res = pm.response.json();
+pm.environment.set(<span class="str">"accessToken"</span>,  res.accessToken);
+pm.environment.set(<span class="str">"refreshToken"</span>, res.refreshToken);</pre>
+
+      <div class="resp-row">
+        <div class="badge badge-200">200 OK</div>
+        <div class="resp-desc">Same response shape as register.</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <h2>Step 3 — Call a Protected Endpoint</h2>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-title">Use the access token on any protected API</div>
+      <div class="step-method method-post">GET</div>
+    </div>
+    <div class="step-body">
+      <div class="url-label">URL (example)</div>
+      <div class="url-bar">{{baseUrl}}/api/jobs/1</div>
+
+      <div class="tabs"><div class="tab active">Authorization tab</div></div>
+      <table style="margin-bottom:10px">
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Type</td><td>Bearer Token</td></tr>
+        <tr><td>Token</td><td><code>{{accessToken}}</code></td></tr>
+      </table>
+      <div class="callout success">
+        Postman will inject <code>Authorization: Bearer &lt;accessToken&gt;</code> into the request header automatically.
+      </div>
+      <div class="resp-row">
+        <div class="badge badge-200">200 OK</div>
+        <div class="resp-desc">Token is valid — you get the job data.</div>
+      </div>
+      <div class="resp-row">
+        <div class="badge badge-401">401</div>
+        <div class="resp-desc">Token is expired — proceed to Step 4 to refresh it.</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <h2>Step 4 — Refresh the Access Token <span style="font-weight:400;font-size:13px;color:#57606a">(the key step)</span></h2>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-title">Exchange refresh token for new token pair</div>
+      <div class="step-method method-post">POST</div>
+    </div>
+    <div class="step-body">
+      <div class="url-label">URL</div>
+      <div class="url-bar">{{baseUrl}}/api/auth/refresh</div>
+
+      <div class="callout">
+        <strong>No Authorization header needed.</strong> The refresh token travels in the request body, not as a Bearer token. Leave the Authorization tab set to "No Auth".
+      </div>
+
+      <div class="tabs"><div class="tab active">Body · raw · JSON</div></div>
+      <pre>{
+  <span class="key">"refreshToken"</span>: <span class="str">"{{refreshToken}}"</span>
+}</pre>
+
+      <div class="script-label"><span>Scripts</span> Tests tab — IMPORTANT: replaces both tokens</div>
+      <pre><span class="cmt">// The old refreshToken is now dead. Save the new pair immediately.</span>
+<span class="key">const</span> res = pm.response.json();
+pm.environment.set(<span class="str">"accessToken"</span>,  res.accessToken);
+pm.environment.set(<span class="str">"refreshToken"</span>, res.refreshToken);</pre>
+
+      <div class="resp-row">
+        <div class="badge badge-200">200 OK</div>
+        <div class="resp-desc">New access token (24 h) + new refresh token (7 d) returned. Old refresh token is <strong>deleted from DB</strong>.</div>
+      </div>
+      <div class="resp-row">
+        <div class="badge badge-401">401</div>
+        <div class="resp-desc">Refresh token not found or expired — user must log in again.</div>
+      </div>
+      <div class="resp-row">
+        <div class="badge badge-400">400</div>
+        <div class="resp-desc"><code>refreshToken</code> field is blank or missing.</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <h2>Step 5 — Logout</h2>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-title">Invalidate the refresh token server-side</div>
+      <div class="step-method method-post">POST</div>
+    </div>
+    <div class="step-body">
+      <div class="url-label">URL</div>
+      <div class="url-bar">{{baseUrl}}/api/auth/logout</div>
+
+      <div class="tabs"><div class="tab active">Body · raw · JSON</div></div>
+      <pre>{
+  <span class="key">"refreshToken"</span>: <span class="str">"{{refreshToken}}"</span>
+}</pre>
+
+      <div class="script-label"><span>Scripts</span> Tests tab — clear saved tokens</div>
+      <pre>pm.environment.unset(<span class="str">"accessToken"</span>);
+pm.environment.unset(<span class="str">"refreshToken"</span>);</pre>
+
+      <div class="resp-row">
+        <div class="badge badge-204">204 No Content</div>
+        <div class="resp-desc">Refresh token deleted from DB. No response body.</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <hr />
+  <h2>Negative Tests — Verify Security Behaviour</h2>
+  <p>Run these after Step 4 to confirm the rotation and expiry logic is working correctly.</p>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">!</div>
+      <div class="step-title">Replay the OLD refresh token after rotation</div>
+      <div class="step-method method-post">POST</div>
+    </div>
+    <div class="step-body">
+      <p>After a successful <code>/refresh</code>, copy the <em>old</em> refresh token string from Postman's console history, then send it again to <code>/api/auth/refresh</code>.</p>
+      <div class="resp-row">
+        <div class="badge badge-401">401 Expected</div>
+        <div class="resp-desc">Token was deleted during rotation — cannot be replayed. ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">!</div>
+      <div class="step-title">Use refresh token after logout</div>
+      <div class="step-method method-post">POST</div>
+    </div>
+    <div class="step-body">
+      <p>Call <code>/api/auth/logout</code>, then immediately call <code>/api/auth/refresh</code> with the same token.</p>
+      <div class="resp-row">
+        <div class="badge badge-401">401 Expected</div>
+        <div class="resp-desc">Token was deleted on logout — server rejects it. ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">!</div>
+      <div class="step-title">Send a random garbage token</div>
+      <div class="step-method method-post">POST</div>
+    </div>
+    <div class="step-body">
+      <pre>{
+  <span class="key">"refreshToken"</span>: <span class="str">"this-is-not-a-real-token"</span>
+}</pre>
+      <div class="resp-row">
+        <div class="badge badge-401">401 Expected</div>
+        <div class="resp-desc">Not found in DB — rejected. ✓</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <hr />
+  <h2>Tips</h2>
+  <table>
+    <tr><th>Scenario</th><th>What to do</th></tr>
+    <tr>
+      <td>Want to test an expired access token without waiting 24 h</td>
+      <td>Temporarily change <code>security.jwt.expiration</code> in <code>application.yaml</code> to <code>60000</code> (1 minute), restart the app, login, wait 1 min, then call a protected endpoint.</td>
+    </tr>
+    <tr>
+      <td>Want to test an expired refresh token</td>
+      <td>Change <code>security.jwt.refesh-expiration</code> to <code>60000</code> (1 minute), restart, login, wait 1 min, then call <code>/refresh</code>. Expect <code>401</code>.</td>
+    </tr>
+    <tr>
+      <td>See the token payload</td>
+      <td>Paste the <code>accessToken</code> JWT value into <a href="https://jwt.io" target="_blank">jwt.io</a> to inspect <code>sub</code>, <code>roles</code>, <code>iat</code>, <code>exp</code> claims. The refresh token is opaque — nothing to decode.</td>
+    </tr>
+    <tr>
+      <td>Automate the full flow</td>
+      <td>Create a Postman Collection and chain the requests using the Tests scripts above. Use "Run Collection" to execute all steps in order.</td>
+    </tr>
+  </table>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>
