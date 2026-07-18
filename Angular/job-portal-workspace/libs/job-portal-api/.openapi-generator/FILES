@@ -1,11 +1,10 @@
 .gitignore
-.openapi-generator-ignore
 README.md
 api.base.service.ts
 api.module.ts
 api/api.ts
-api/authController.service.ts
-api/authController.serviceInterface.ts
+api/authentication.service.ts
+api/authentication.serviceInterface.ts
 api/jobController.service.ts
 api/jobController.serviceInterface.ts
 configuration.ts
@@ -16,7 +15,9 @@ model/authReponse.ts
 model/jobRequest.ts
 model/jobResponse.ts
 model/loginRequest.ts
+model/logoutRequest.ts
 model/models.ts
+model/refreshTokenRequest.ts
 model/registerRequest.ts
 model/userInfo.ts
 ng-package.json

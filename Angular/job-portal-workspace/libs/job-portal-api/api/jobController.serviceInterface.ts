@@ -31,4 +31,29 @@ export interface JobControllerServiceInterface {
      */
     createJob(jobRequest: JobRequest, extraHttpRequestParams?: any): Observable<JobResponse>;
 
+    /**
+     * 
+     * 
+     * @endpoint delete /api/jobs/{id}
+     * @param id 
+     */
+    deleteJob(id: number, extraHttpRequestParams?: any): Observable<{}>;
+
+    /**
+     * 
+     * 
+     * @endpoint get /api/jobs/{id}
+     * @param id 
+     */
+    getJob(id: number, extraHttpRequestParams?: any): Observable<JobResponse>;
+
+    /**
+     * 
+     * 
+     * @endpoint put /api/jobs/{id}
+     * @param id 
+     * @param jobRequest 
+     */
+    updateJob(id: number, jobRequest: JobRequest, extraHttpRequestParams?: any): Observable<JobResponse>;
+
 }

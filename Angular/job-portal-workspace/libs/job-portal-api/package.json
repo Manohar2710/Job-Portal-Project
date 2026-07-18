@@ -1,7 +1,7 @@
 {
-  "name": "@job-portal/auth-api",
+  "name": "@job-portal/job-portal-api",
   "version": "1.0.0",
-  "description": "OpenAPI client for @job-portal/auth-api",
+  "description": "OpenAPI client for @job-portal/job-portal-api",
   "author": "OpenAPI-Generator Contributors",
   "repository": {
     "type": "git",

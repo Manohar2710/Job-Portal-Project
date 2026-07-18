@@ -15,5 +15,15 @@ export interface RegisterRequest {
     email: string;
     password: string;
     phone?: string;
+    role?: RegisterRequest.RoleEnum;
 }
+export namespace RegisterRequest {
+    export const RoleEnum = {
+        RoleUser: 'ROLE_USER',
+        RoleRecruiter: 'ROLE_RECRUITER',
+        RoleAdmin: 'ROLE_ADMIN'
+    } as const;
+    export type RoleEnum = typeof RoleEnum[keyof typeof RoleEnum];
+}
+
 

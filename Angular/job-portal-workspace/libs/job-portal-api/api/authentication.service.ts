@@ -17,42 +17,49 @@ import { Observable }                                        from 'rxjs';
 import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 
 // @ts-ignore
-import { JobRequest } from '../model/jobRequest';
+import { AuthReponse } from '../model/authReponse';
 // @ts-ignore
-import { JobResponse } from '../model/jobResponse';
+import { LoginRequest } from '../model/loginRequest';
+// @ts-ignore
+import { LogoutRequest } from '../model/logoutRequest';
+// @ts-ignore
+import { RefreshTokenRequest } from '../model/refreshTokenRequest';
+// @ts-ignore
+import { RegisterRequest } from '../model/registerRequest';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
 import {
-    JobControllerServiceInterface
-} from './jobController.serviceInterface';
+    AuthenticationServiceInterface
+} from './authentication.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class JobControllerService extends BaseService implements JobControllerServiceInterface {
+export class AuthenticationService extends BaseService implements AuthenticationServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);
     }
 
     /**
-     * @endpoint post /api/jobs
-     * @param jobRequest 
+     * Login with email and password
+     * @endpoint post /api/auth/login
+     * @param loginRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public createJob(jobRequest: JobRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<JobResponse>;
-    public createJob(jobRequest: JobRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<JobResponse>>;
-    public createJob(jobRequest: JobRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<JobResponse>>;
-    public createJob(jobRequest: JobRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<any> {
-        if (jobRequest === null || jobRequest === undefined) {
-            throw new Error('Required parameter jobRequest was null or undefined when calling createJob.');
+    public login(loginRequest: LoginRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<AuthReponse>;
+    public login(loginRequest: LoginRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AuthReponse>>;
+    public login(loginRequest: LoginRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AuthReponse>>;
+    public login(loginRequest: LoginRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (loginRequest === null || loginRequest === undefined) {
+            throw new Error('Required parameter loginRequest was null or undefined when calling login.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -92,12 +99,12 @@ export class JobControllerService extends BaseService implements JobControllerSe
             }
         }
 
-        let localVarPath = `/api/jobs`;
+        let localVarPath = `/api/auth/login`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<JobResponse>('post', `${basePath}${localVarPath}`,
+        return this.httpClient.request<AuthReponse>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: jobRequest,
+                body: loginRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -109,18 +116,20 @@ export class JobControllerService extends BaseService implements JobControllerSe
     }
 
     /**
-     * @endpoint delete /api/jobs/{id}
-     * @param id 
+     * Logout — invalidate refresh token
+     * Deletes the refresh token from the server so it can never be used again. The client must discard both the access token and refresh token after calling this endpoint.
+     * @endpoint post /api/auth/logout
+     * @param logoutRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public deleteJob(id: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public deleteJob(id: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public deleteJob(id: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteJob(id: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling deleteJob.');
+    public logout(logoutRequest: LogoutRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public logout(logoutRequest: LogoutRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public logout(logoutRequest: LogoutRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public logout(logoutRequest: LogoutRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (logoutRequest === null || logoutRequest === undefined) {
+            throw new Error('Required parameter logoutRequest was null or undefined when calling logout.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -139,63 +148,14 @@ export class JobControllerService extends BaseService implements JobControllerSe
         const localVarTransferCache: boolean = options?.transferCache ?? true;
 
 
-        let responseType_: 'text' | 'json' | 'blob' = 'json';
-        if (localVarHttpHeaderAcceptSelected) {
-            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
-                responseType_ = 'text';
-            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
-                responseType_ = 'json';
-            } else {
-                responseType_ = 'blob';
-            }
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
         }
-
-        let localVarPath = `/api/jobs/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
-        const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
-            {
-                context: localVarHttpContext,
-                responseType: <any>responseType_,
-                ...(withCredentials ? { withCredentials } : {}),
-                headers: localVarHeaders,
-                observe: observe,
-                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
-     * @endpoint get /api/jobs/{id}
-     * @param id 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     * @param options additional options
-     */
-    public getJob(id: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<JobResponse>;
-    public getJob(id: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<JobResponse>>;
-    public getJob(id: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<JobResponse>>;
-    public getJob(id: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling getJob.');
-        }
-
-        let localVarHeaders = this.defaultHeaders;
-
-        // authentication (bearerAuth) required
-        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
-
-        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            '*/*'
-        ]);
-        if (localVarHttpHeaderAcceptSelected !== undefined) {
-            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
-        }
-
-        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
-
-        const localVarTransferCache: boolean = options?.transferCache ?? true;
-
 
         let responseType_: 'text' | 'json' | 'blob' = 'json';
         if (localVarHttpHeaderAcceptSelected) {
@@ -208,11 +168,12 @@ export class JobControllerService extends BaseService implements JobControllerSe
             }
         }
 
-        let localVarPath = `/api/jobs/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
+        let localVarPath = `/api/auth/logout`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<JobResponse>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                body: logoutRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -224,22 +185,20 @@ export class JobControllerService extends BaseService implements JobControllerSe
     }
 
     /**
-     * @endpoint put /api/jobs/{id}
-     * @param id 
-     * @param jobRequest 
+     * Refresh access token
+     * Exchange a valid refresh token for a new access token + rotated refresh token pair. The old refresh token is invalidated immediately after use.
+     * @endpoint post /api/auth/refresh
+     * @param refreshTokenRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public updateJob(id: number, jobRequest: JobRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<JobResponse>;
-    public updateJob(id: number, jobRequest: JobRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<JobResponse>>;
-    public updateJob(id: number, jobRequest: JobRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<JobResponse>>;
-    public updateJob(id: number, jobRequest: JobRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling updateJob.');
-        }
-        if (jobRequest === null || jobRequest === undefined) {
-            throw new Error('Required parameter jobRequest was null or undefined when calling updateJob.');
+    public refresh(refreshTokenRequest: RefreshTokenRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<AuthReponse>;
+    public refresh(refreshTokenRequest: RefreshTokenRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AuthReponse>>;
+    public refresh(refreshTokenRequest: RefreshTokenRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AuthReponse>>;
+    public refresh(refreshTokenRequest: RefreshTokenRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (refreshTokenRequest === null || refreshTokenRequest === undefined) {
+            throw new Error('Required parameter refreshTokenRequest was null or undefined when calling refresh.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -279,12 +238,81 @@ export class JobControllerService extends BaseService implements JobControllerSe
             }
         }
 
-        let localVarPath = `/api/jobs/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
+        let localVarPath = `/api/auth/refresh`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<JobResponse>('put', `${basePath}${localVarPath}`,
+        return this.httpClient.request<AuthReponse>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: jobRequest,
+                body: refreshTokenRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Register new user
+     * @endpoint post /api/auth/register
+     * @param registerRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public register(registerRequest: RegisterRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<AuthReponse>;
+    public register(registerRequest: RegisterRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AuthReponse>>;
+    public register(registerRequest: RegisterRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AuthReponse>>;
+    public register(registerRequest: RegisterRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (registerRequest === null || registerRequest === undefined) {
+            throw new Error('Required parameter registerRequest was null or undefined when calling register.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearerAuth) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            '*/*'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/auth/register`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<AuthReponse>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: registerRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

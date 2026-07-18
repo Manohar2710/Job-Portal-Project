@@ -1,4 +1,4 @@
-# @job-portal/auth-api@1.0.0
+# @job-portal/job-portal-api@1.0.0
 
 Authentication endpoints for the Job Portal
 
@@ -24,7 +24,7 @@ Navigate to the folder of your consuming project and run one of next commands.
 _published:_
 
 ```console
-npm install @job-portal/auth-api@1.0.0 --save
+npm install @job-portal/job-portal-api@1.0.0 --save
 ```
 
 _without publishing (not recommended):_
@@ -46,7 +46,7 @@ npm link
 In your project:
 
 ```console
-npm link @job-portal/auth-api
+npm link @job-portal/job-portal-api
 ```
 
 __Note for Windows users:__ The Angular CLI has troubles to use linked npm packages.
@@ -61,7 +61,7 @@ In your Angular project:
 
 import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideApi } from '@job-portal/auth-api';
+import { provideApi } from '@job-portal/job-portal-api';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -75,7 +75,7 @@ export const appConfig: ApplicationConfig = {
 **NOTE**
 If you're still using `AppModule` and haven't [migrated](https://angular.dev/reference/migrations/standalone) yet, you can still import an Angular module:
 ```typescript
-import { ApiModule } from '@job-portal/auth-api';
+import { ApiModule } from '@job-portal/job-portal-api';
 ```
 
 If different from the generated base path, during app bootstrap, you can provide the base path to your service.
@@ -83,7 +83,7 @@ If different from the generated base path, during app bootstrap, you can provide
 ```typescript
 import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideApi } from '@job-portal/auth-api';
+import { provideApi } from '@job-portal/job-portal-api';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -98,7 +98,7 @@ export const appConfig: ApplicationConfig = {
 // with a custom configuration
 import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideApi } from '@job-portal/auth-api';
+import { provideApi } from '@job-portal/job-portal-api';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -117,7 +117,7 @@ export const appConfig: ApplicationConfig = {
 // with factory building a custom configuration
 import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideApi, Configuration } from '@job-portal/auth-api';
+import { provideApi, Configuration } from '@job-portal/job-portal-api';
 
 export const appConfig: ApplicationConfig = {
     providers: [
