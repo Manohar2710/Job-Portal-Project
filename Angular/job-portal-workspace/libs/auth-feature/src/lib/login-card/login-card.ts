@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthCard, AuthButton, FormField } from 'shared-ui';
-import { AuthControllerService } from 'job-portal-api';
+import { AuthenticationService } from 'job-portal-api';
 
 @Component({
   selector: 'auth-login-card',
@@ -12,7 +12,7 @@ import { AuthControllerService } from 'job-portal-api';
 })
 export class LoginCard {
   private fb = inject(FormBuilder);
-  private authService = inject(AuthControllerService);
+  private authService = inject(AuthenticationService);
   private router = inject(Router);
 
   isLoading = false;
