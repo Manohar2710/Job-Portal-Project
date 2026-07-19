@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.learning.security.filter.JwtAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -46,33 +47,42 @@ public class SecurityConfig {
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // 4. Route authorisation rules
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints — no token required
-                .requestMatchers(
-                    "/api/auth/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**",
-                    // Actuator health/liveness/readiness probes — must be reachable without a token
-                    // (Kubernetes readiness/liveness probes do not send Authorization headers).
-                    // The management port (8081) is not exposed via the public ingress, so this
-                    // only widens access on the internal management interface.
-                    "/actuator/health",
-                    "/actuator/health/liveness",
-                    "/actuator/health/readiness",
-                    "/actuator/info"
-                )
-                .permitAll()
-                // All other actuator endpoints (metrics, prometheus) stay authenticated
-                .requestMatchers("/actuator/**").authenticated()
-                // Everything else requires a valid JWT
-                .anyRequest().authenticated()
+        .authorizeHttpRequests(auth -> auth
+            // Public endpoints — no token required
+            .requestMatchers(
+                "/api/auth/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/v3/api-docs/**",
+                // Actuator health/liveness/readiness probes — must be reachable without a token
+                // (Kubernetes readiness/liveness probes do not send Authorization headers).
+                // The management port (8081) is not exposed via the public ingress, so this
+                // only widens access on the internal management interface.
+                "/actuator/health",
+                "/actuator/health/liveness",
+                "/actuator/health/readiness",
+                "/actuator/info"
             )
-            // 5. Plug in our DaoAuthenticationProvider
-            .authenticationProvider(authenticationProvider())
-            // 6. Register JWT filter BEFORE the default username/password filter
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
+            .permitAll()
+            // All other actuator endpoints (metrics, prometheus) stay authenticated
+            .requestMatchers("/actuator/**").authenticated()
+            // Everything else requires a valid JWT
+            .anyRequest().authenticated()
+        )
+        .exceptionHandling(ex -> ex                         
+            .authenticationEntryPoint(
+                (request, response, authException) ->
+                    response.sendError(
+                        HttpServletResponse.SC_UNAUTHORIZED,
+                        "Authentication required"
+                    )
+                )
+        )
+        // 5. Plug in our DaoAuthenticationProvider
+        .authenticationProvider(authenticationProvider())
+        // 6. Register JWT filter BEFORE the default username/password filter
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
         
     }
     // -----------------------------------------------------------------------
