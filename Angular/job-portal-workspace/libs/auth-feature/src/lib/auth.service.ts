@@ -1,6 +1,6 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { map, Observable, tap, throwError } from 'rxjs';
 
 import {
   AuthenticationService,
@@ -119,6 +119,25 @@ export class AuthService implements OnDestroy {
   ngOnDestroy(): void {
     this.cancelRefreshTimer();
   }
+
+  /**
+ * Observable-returning variant used by the HTTP interceptor.
+ * Emits the new access token string on success so the interceptor
+ * can retry the original request via switchMap.
+ * Throws on failure (refresh token expired / revoked).
+ */
+doRefresh$(): Observable<string> {
+  const refreshToken = this.getRefreshToken();
+
+  if (!refreshToken) {
+    return throwError(() => new Error('No refresh token available'));
+  }
+
+  return this.api.refresh({ refreshToken }).pipe(
+    tap((res) => this.handleAuthResponse(res)),
+    map((res) => res.accessToken ?? '')
+  );
+}
 
   // ─── Private helpers ────────────────────────────────────────────────────────
 
