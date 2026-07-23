@@ -10,7 +10,7 @@ You've just received a comprehensive learning plan to master Spring Boot + Angul
 
 You now have **5 comprehensive guides** totaling over 2,500 lines of content:
 
-1. **[`README-LEARNING-PLAN.md`](./README-LEARNING-PLAN.md)** - Start here! Overview and navigation
+1. **[`README-LEARNING-PLAN.md`](./guides/README-LEARNING-PLAN.md)** - Start here! Overview and navigation
 2. **SENIOR-FULLSTACK-LEARNING-PLAN.md** - Phases 1-2 with architecture
 3. **SPRING-BOOT-ADVANCED-GUIDE.md** - Phases 3-6 (Security, Caching, Async, APIs)
 4. **ANGULAR-ADVANCED-GUIDE.md** - Phases 10-11 (State Management, Advanced Patterns)
@@ -22,13 +22,13 @@ You now have **5 comprehensive guides** totaling over 2,500 lines of content:
 ## ⚡ Quick Start (Next 30 Minutes)
 
 ### Step 1: Read the Overview (10 min)
-Open [`README-LEARNING-PLAN.md`](./README-LEARNING-PLAN.md) to understand:
+Open [`README-LEARNING-PLAN.md`](./guides/README-LEARNING-PLAN.md) to understand:
 - What each guide covers
 - Your learning path
 - How to use the materials
 
 ### Step 2: Review the Roadmap (10 min)
-Open [`IMPLEMENTATION-ROADMAP.md`](./IMPLEMENTATION-ROADMAP.md) to see:
+Open [`IMPLEMENTATION-ROADMAP.md`](./guides/IMPLEMENTATION-ROADMAP.md) to see:
 - Week-by-week implementation plan
 - Time estimates for each phase
 - Quick reference cheat sheets
@@ -125,9 +125,9 @@ Forgot an annotation?
 
 ## 🚀 Next Steps
 
-1. **Right Now**: Read [`README-LEARNING-PLAN.md`](./README-LEARNING-PLAN.md)
+1. **Right Now**: Read [`README-LEARNING-PLAN.md`](./guides/README-LEARNING-PLAN.md)
 2. **Today**: Set up your environment and create Spring Boot project
-3. **This Week**: Follow Week 1 plan from [`IMPLEMENTATION-ROADMAP.md`](./IMPLEMENTATION-ROADMAP.md)
+3. **This Week**: Follow Week 1 plan from [`IMPLEMENTATION-ROADMAP.md`](./guides/IMPLEMENTATION-ROADMAP.md)
 4. **Daily**: Practice coding and review concepts
 
 **Good luck with your learning journey!** 🎓
