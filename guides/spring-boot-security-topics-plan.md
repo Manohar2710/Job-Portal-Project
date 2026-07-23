@@ -170,24 +170,26 @@ These two are heavily tested topics that are commonly misunderstood, especially 
 **Intent:**
 OAuth2 and OIDC are senior-level differentiators. The current project does not use them but understanding the flows, when to use them, and how to integrate them with Spring Security is critical for senior interviews and real-world systems.
 
+**Scope decision:** Conceptual only — no working code examples. Focus on mental models and interview articulation.
+
 **Expected Outcomes:**
 - Section written: "OAuth2 and OpenID Connect"
-- Covers: OAuth2 roles (resource owner, client, authorization server, resource server), authorization code flow, PKCE, client credentials flow, implicit flow (deprecated), OIDC on top of OAuth2, Spring Security's `spring-boot-starter-oauth2-resource-server` and `spring-boot-starter-oauth2-client`, JWT resource server configuration
-- Junior angle: what is OAuth2 at a conceptual level
-- Senior angle: when to use authorization code + PKCE vs client credentials, how to configure Spring Boot as a resource server validating JWTs from Keycloak/Auth0/Okta
+- Covers: OAuth2 roles (resource owner, client, authorization server, resource server), authorization code flow, PKCE, client credentials flow, implicit flow (deprecated and why), OIDC on top of OAuth2, when to reach for `spring-boot-starter-oauth2-resource-server`
+- Junior angle: what OAuth2 is and why it exists — conceptual understanding only
+- Senior angle: when to use authorization code + PKCE vs client credentials, when to use an authorization server (Keycloak/Auth0/Okta) vs rolling your own JWT — trade-off discussion
 
 **Todo List:**
-1. Write OAuth2 roles and concepts — resource owner, client, authorization server, resource server
-2. Write authorization code + PKCE flow — step by step with sequence diagram (text-based)
-3. Write client credentials flow — service-to-service auth use case
-4. Write OIDC extension — `id_token`, UserInfo endpoint, claims
-5. Write Spring Boot resource server configuration — `spring-security-oauth2-resource-server`, JWT decoder, authority mapping from claims
-6. Write "when to use an authorization server" — Keycloak, Auth0, Okta, or custom
-7. Write social login (Google/GitHub) integration pattern using `oauth2-client`
+1. Write OAuth2 roles and concepts — resource owner, client, authorization server, resource server (text only)
+2. Write authorization code + PKCE flow — text-based step-by-step description (no code)
+3. Write client credentials flow — service-to-service auth use case description (text only)
+4. Write OIDC extension — `id_token`, UserInfo endpoint, claims — conceptual description
+5. Write "when to use an authorization server" — Keycloak, Auth0, Okta vs custom JWT — trade-off discussion
+6. Write why implicit flow is deprecated — redirect-based token exposure risks
+7. Write "how this relates to the current project" — contrast with existing JWT approach and when you would migrate
 8. Add interview Q&A block
 
 **Relevant Context:**
-- No existing code — conceptual + configuration guide with code snippets
+- No existing code — conceptual guide only, no configuration snippets
 - Links to existing `SecurityConfig.java` to show contrast with current JWT approach
 
 ---
@@ -308,20 +310,21 @@ Detecting and responding to security events is a senior-level topic that is almo
 **Intent:**
 The project has a WebFlux migration guide (`SECURITY-WEBFLUX-IMPLEMENTATION-GUIDE.md`) but it is step-by-step code. This section provides the conceptual + comparison layer that enables developers to explain the differences confidently in interviews.
 
+**Scope decision:** Conceptual and interview-angle only — no duplicate code. Full implementation already lives in `SECURITY-WEBFLUX-IMPLEMENTATION-GUIDE.md`. This section exists purely to help developers explain the differences confidently.
+
 **Expected Outcomes:**
 - Section written: "Reactive Security with Spring WebFlux"
-- Covers: `ReactiveSecurityContextHolder` vs `SecurityContextHolder`, `WebFilter` vs `OncePerRequestFilter`, `ReactiveAuthenticationManager`, `ServerHttpSecurity` vs `HttpSecurity`, R2DBC + reactive `UserDetailsService`
-- Junior angle: why the same security class names don't work in WebFlux
-- Senior angle: context propagation across reactor operators, non-blocking JWT filter, `Mono<SecurityContext>` vs `ThreadLocal`
+- Covers: why thread-local `SecurityContextHolder` breaks in reactive, the `ReactiveSecurityContextHolder` mental model, class-name mapping between MVC and WebFlux security equivalents (`HttpSecurity` → `ServerHttpSecurity`, `OncePerRequestFilter` → `WebFilter`, etc.), interview articulation of the trade-offs
+- Junior angle: awareness that MVC and WebFlux security are different class hierarchies
+- Senior angle: why thread-local context fails in reactive pipelines, how Reactor context propagation works, and the conceptual differences to explain in an interview
 
 **Todo List:**
-1. Write why thread-local fails in reactive — Project Reactor's execution model, operator fusion
-2. Write `ReactiveSecurityContextHolder` — `withAuthentication()`, `getContext()` from Reactor context
-3. Write reactive JWT filter — `WebFilter` with `Mono<Void>` return
-4. Write `ServerHttpSecurity` configuration — reactive equivalent of `HttpSecurity`
-5. Write reactive `UserDetailsService` — `ReactiveUserDetailsService` interface
-6. Reference `SECURITY-WEBFLUX-IMPLEMENTATION-GUIDE.md` for full implementation steps
-7. Add interview Q&A block
+1. Write why thread-local fails in reactive — Project Reactor's execution model (short, conceptual — no code)
+2. Write class equivalence table — MVC vs WebFlux security component mapping
+3. Write `ReactiveSecurityContextHolder` mental model — contrast with `SecurityContextHolder` (conceptual)
+4. Write "when to choose WebFlux security" — use cases and trade-offs
+5. Reference `SECURITY-WEBFLUX-IMPLEMENTATION-GUIDE.md` explicitly for full implementation code
+6. Add interview Q&A block
 
 **Relevant Context:**
 - [`SECURITY-WEBFLUX-IMPLEMENTATION-GUIDE.md`](./SECURITY-WEBFLUX-IMPLEMENTATION-GUIDE.md) — existing step-by-step guide
@@ -336,25 +339,27 @@ The project has a WebFlux migration guide (`SECURITY-WEBFLUX-IMPLEMENTATION-GUID
 **Intent:**
 Security tests are the most important tests in the application but the most commonly skipped by developers who are still learning. This section provides the full testing toolkit.
 
+**Scope decision:** Documentation only in the guide — no test files are created in the project.
+
 **Expected Outcomes:**
 - Section written: "Testing Spring Security"
-- Covers: `@WithMockUser`, `@WithUserDetails`, `@WithSecurityContext`, `MockMvc` with `SecurityMockMvcConfigurers.springSecurity()`, testing 401/403 responses, testing `@PreAuthorize` in service layer, `@WebMvcTest` vs `@SpringBootTest` for security tests, JWT token helper for integration tests
+- Covers: `@WithMockUser`, `@WithUserDetails`, `@WithSecurityContext`, `MockMvc` with `SecurityMockMvcConfigurers.springSecurity()`, testing 401/403 responses, testing `@PreAuthorize` in service layer, `@WebMvcTest` vs `@SpringBootTest` for security tests, JWT token helper for integration tests — all as documented patterns with code snippets in the guide
 - Junior angle: how to write a test that passes as a specific role
 - Senior angle: testing method-level security in isolation, building a JWT token factory for integration tests, testing token expiry and refresh flows
 
 **Todo List:**
-1. Write `@WithMockUser` — simplest way to set the security context in a test
-2. Write `@WithUserDetails` — loads real `UserDetails` from `UserDetailsService`
-3. Write `@WithSecurityContext` — fully custom security context for complex claims
-4. Write `MockMvc` security tests — test 401 unauthenticated, 403 wrong role, 200 correct role
-5. Write service-layer method security tests — `@PreAuthorize` in isolation
-6. Write JWT integration test helper — generating a real JWT for `@SpringBootTest` tests
-7. Write token expiry test pattern — clock manipulation or short TTL
+1. Write `@WithMockUser` — simplest way to set the security context in a test (code snippet in guide only)
+2. Write `@WithUserDetails` — loads real `UserDetails` from `UserDetailsService` (code snippet in guide only)
+3. Write `@WithSecurityContext` — fully custom security context for complex claims (code snippet in guide only)
+4. Write `MockMvc` security tests — test 401 unauthenticated, 403 wrong role, 200 correct role (code snippets in guide only)
+5. Write service-layer method security tests — `@PreAuthorize` in isolation (code snippet in guide only)
+6. Write JWT integration test helper pattern — generating a real JWT in tests (code snippet in guide only)
+7. Write token expiry test pattern — clock manipulation or short TTL (code snippet in guide only)
 8. Add interview Q&A block
 
 **Relevant Context:**
-- `Springboot/security-module/src/test/` — currently empty, tests to be added
-- [`AuthController.java`](Springboot/security-module/src/main/java/com/learning/security/controller/AuthController.java) — endpoints to test
+- `Springboot/security-module/src/test/` — currently empty (no files created by this plan)
+- [`AuthController.java`](Springboot/security-module/src/main/java/com/learning/security/controller/AuthController.java) — endpoints referenced in guide examples
 
 ---
 
@@ -368,7 +373,7 @@ Provide a final, scannable production security checklist and a consolidated set 
 **Expected Outcomes:**
 - Section written: "Production Security Checklist"
 - Section written: "Security Interview Q&A — Junior through Senior"
-- Covers 30+ Q&A items grouped by: fundamentals, JWT, authorization, OAuth2, transport, rate limiting, headers, testing, WebFlux
+- Covers 30+ Q&A items grouped by: fundamentals, JWT, authorization, OAuth2 (conceptual), transport, rate limiting, headers, testing, WebFlux (conceptual)
 
 **Todo List:**
 1. Write production checklist — authentication, authorization, transport, headers, secrets, rate limiting, logging, testing
