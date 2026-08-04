@@ -5,7 +5,10 @@
 //    @use 'path/to/libs/shared-ui/src/styles/index';
 // ============================================================
 
-@use 'tokens';   // loads _tokens.scss — defines :root vars
-@use 'reset';    // loads _reset.scss  — uses the vars above
+// Angular Material custom theme (must come first — emits component styles)
+@use 'material-theme';
+
+@use 'tokens';       // loads _tokens.scss — defines :root vars
+@use 'reset';        // loads _reset.scss  — uses the vars above
 @use 'typography';   // _typography.scss — heading, description, text classes
 
