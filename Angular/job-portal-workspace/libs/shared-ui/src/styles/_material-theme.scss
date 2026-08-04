@@ -1,0 +1,200 @@
+// ============================================================
+//  Angular Material Custom Theme — Job Portal
+//
+//  Brand palette is derived from the existing JP design tokens:
+//    Primary   → Indigo  #4f46e5  (--jp-primary)
+//    Secondary → Teal    #0d9488  (accent / calls-to-action)
+//    Tertiary  → Amber   #f59e0b  (highlights / warnings)
+//    Error     → Red     #dc2626  (--jp-error)
+//
+//  The theme is M3 (Material Design 3) — the default for
+//  Angular Material v17+. Both light and dark schemes are
+//  defined so apps can toggle [data-theme="dark"] on <html>.
+// ============================================================
+
+@use '@angular/material' as mat;
+
+// ── 1. Core (typography scale + base density) ────────────────
+@include mat.core();
+
+// ── 2. Custom colour palettes ────────────────────────────────
+
+//  Primary — Indigo (matches --jp-primary: #4f46e5)
+$jp-primary-palette: mat.m2-define-palette(
+  (
+    50:   #eef2ff,
+    100:  #e0e7ff,
+    200:  #c7d2fe,
+    300:  #a5b4fc,
+    400:  #818cf8,
+    500:  #6366f1,
+    600:  #4f46e5,   // ← brand primary
+    700:  #4338ca,   // ← --jp-primary-hover
+    800:  #3730a3,
+    900:  #312e81,
+    A100: #c7d2fe,
+    A200: #a5b4fc,
+    A400: #818cf8,
+    A700: #4338ca,
+    contrast: (
+      50:   #1f2328,
+      100:  #1f2328,
+      200:  #1f2328,
+      300:  #1f2328,
+      400:  #1f2328,
+      500:  #ffffff,
+      600:  #ffffff,
+      700:  #ffffff,
+      800:  #ffffff,
+      900:  #ffffff,
+      A100: #1f2328,
+      A200: #1f2328,
+      A400: #ffffff,
+      A700: #ffffff,
+    ),
+  ),
+  600,   // default hue
+  300,   // lighter hue
+  800    // darker hue
+);
+
+//  Secondary / Accent — Teal
+$jp-accent-palette: mat.m2-define-palette(
+  (
+    50:   #f0fdfa,
+    100:  #ccfbf1,
+    200:  #99f6e4,
+    300:  #5eead4,
+    400:  #2dd4bf,
+    500:  #14b8a6,
+    600:  #0d9488,   // ← brand accent
+    700:  #0f766e,
+    800:  #115e59,
+    900:  #134e4a,
+    A100: #ccfbf1,
+    A200: #5eead4,
+    A400: #14b8a6,
+    A700: #0f766e,
+    contrast: (
+      50:   #1f2328,
+      100:  #1f2328,
+      200:  #1f2328,
+      300:  #1f2328,
+      400:  #1f2328,
+      500:  #ffffff,
+      600:  #ffffff,
+      700:  #ffffff,
+      800:  #ffffff,
+      900:  #ffffff,
+      A100: #1f2328,
+      A200: #1f2328,
+      A400: #ffffff,
+      A700: #ffffff,
+    ),
+  ),
+  600,
+  300,
+  800
+);
+
+//  Warn / Error — Red (matches --jp-error: #dc2626)
+$jp-warn-palette: mat.m2-define-palette(
+  (
+    50:   #fef2f2,
+    100:  #fee2e2,
+    200:  #fecaca,
+    300:  #fca5a5,   // ← --jp-error-border
+    400:  #f87171,
+    500:  #ef4444,
+    600:  #dc2626,   // ← --jp-error
+    700:  #b91c1c,
+    800:  #991b1b,
+    900:  #7f1d1d,
+    A100: #fee2e2,
+    A200: #fca5a5,
+    A400: #ef4444,
+    A700: #b91c1c,
+    contrast: (
+      50:   #1f2328,
+      100:  #1f2328,
+      200:  #1f2328,
+      300:  #1f2328,
+      400:  #1f2328,
+      500:  #ffffff,
+      600:  #ffffff,
+      700:  #ffffff,
+      800:  #ffffff,
+      900:  #ffffff,
+      A100: #1f2328,
+      A200: #1f2328,
+      A400: #ffffff,
+      A700: #ffffff,
+    ),
+  ),
+  600,
+  300,
+  800
+);
+
+// ── 3. Light theme (default) ─────────────────────────────────
+$jp-light-theme: mat.m2-define-light-theme(
+  (
+    color: (
+      primary:   $jp-primary-palette,
+      accent:    $jp-accent-palette,
+      warn:      $jp-warn-palette,
+    ),
+    typography: mat.m2-define-typography-config(
+      $font-family: "'Inter', system-ui, -apple-system, sans-serif",
+    ),
+    density: 0,
+  )
+);
+
+// ── 4. Dark theme ────────────────────────────────────────────
+$jp-dark-theme: mat.m2-define-dark-theme(
+  (
+    color: (
+      primary:   $jp-primary-palette,
+      accent:    $jp-accent-palette,
+      warn:      $jp-warn-palette,
+    ),
+    typography: mat.m2-define-typography-config(
+      $font-family: "'Inter', system-ui, -apple-system, sans-serif",
+    ),
+    density: 0,
+  )
+);
+
+// ── 5. Emit the light theme globally ─────────────────────────
+//  This outputs all Material component styles with the light
+//  theme tokens. Do NOT call mat.all-component-themes() more
+//  than once — the dark variant is scoped below.
+@include mat.all-component-themes($jp-light-theme);
+
+// ── 6. Dark theme — scoped to [data-theme="dark"] ────────────
+//  Add data-theme="dark" to <html> (or any root element) to
+//  activate. Only colour tokens are re-emitted (no duplication).
+[data-theme='dark'] {
+  @include mat.all-component-colors($jp-dark-theme);
+}
+
+// ── 7. Expose theme colours as CSS custom properties ─────────
+//  Bridges Material theme values back to the --jp-* token system
+//  so non-Material components can stay in sync.
+:root {
+  // Primary colour steps from our palette
+  --jp-mat-primary-light:   #a5b4fc;  // hue 300
+  --jp-mat-primary:         #4f46e5;  // hue 600  (brand primary)
+  --jp-mat-primary-dark:    #3730a3;  // hue 800
+
+  // Accent colour steps
+  --jp-mat-accent-light:    #5eead4;  // hue 300
+  --jp-mat-accent:          #0d9488;  // hue 600
+  --jp-mat-accent-dark:     #115e59;  // hue 800
+
+  // Warn colour steps
+  --jp-mat-warn-light:      #fca5a5;  // hue 300
+  --jp-mat-warn:            #dc2626;  // hue 600
+  --jp-mat-warn-dark:       #991b1b;  // hue 800
+}
