@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: application-service
+  flyway:
+    enabled: true
+    # Unique path — avoids collision with security-module's db/migration entries.
+    locations: classpath:db/app-migration
+    # Each service tracks its own migration history in a dedicated table.
+    table: flyway_schema_history_application
+    # The public schema already contains tables from other services.
+    # Tell Flyway to baseline at v0 rather than refusing to run on a non-empty schema.
+    baseline-on-migrate: true
+    baseline-version: 0
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/job_portal_db
+    username: postgres
+    password: "0000"
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+server:
+  port: 8083
+
+security:
+  jwt:
+    secretKey: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration: 120000
+    refresh-expiration: 604800000
+    issuer: job-portal-service
+  cors:
+    allowed-origins:
+      - http://localhost:4200
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+management:
+  server:
+    port: 8084
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

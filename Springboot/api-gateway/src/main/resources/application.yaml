@@ -1,0 +1,87 @@
+spring:
+  application:
+    name: api-gateway
+
+  # ── Disable JPA/Flyway/SecurityModuleAutoConfig (gateway has no DB) ───────────
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      # Prevents the full @ComponentScan("com.learning.security") which would try to
+      # instantiate UserDetailsServiceImpl → UserRepository → JpaRepository (not on classpath).
+      - com.learning.security.config.SecurityModuleAutoConfiguration
+      # Suppress the "generate random password + block everything" user-details auto-config.
+      # ReactiveSecurityAutoConfiguration stays active so @EnableWebFluxSecurity works;
+      # our GatewaySecurityConfig provides an explicit permitAll SecurityWebFilterChain.
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+
+  cloud:
+    # Spring Cloud 2024.0.1 officially supports Boot 3.4.x; we're on 3.5.x.
+    # The gateway works correctly — disable the version check to prevent a hard startup error.
+    compatibility-verifier:
+      enabled: false
+
+    # ── Gateway routes ────────────────────────────────────────────────────────
+    gateway:
+      default-filters:
+        # Strip the X-User-Id header from inbound requests (prevent spoofing)
+        - RemoveRequestHeader=X-User-Id
+      routes:
+
+        # ── Auth Service (public — no JWT filter) ──────────────────────────
+        - id: security-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+          # No JwtAuthFilter — login/register must be accessible without a token
+
+        # ── Job Service ────────────────────────────────────────────────────
+        - id: job-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/jobs/**
+          filters:
+            - name: JwtAuthFilter
+
+        # ── Application Service ────────────────────────────────────────────
+        - id: application-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/applications/**
+          filters:
+            - name: JwtAuthFilter
+
+      # Global CORS handled at gateway level
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:4200
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+# ── JWT — same secret used by all downstream services ────────────────────────
+security:
+  jwt:
+    secretKey: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration: 120000
+    refresh-expiration: 604800000
+    issuer: job-portal-service
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
