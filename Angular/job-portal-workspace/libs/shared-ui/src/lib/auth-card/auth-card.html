@@ -1,5 +1,5 @@
 <div class="auth-page">
-  <div class="auth-card">
+  <mat-card class="auth-card" appearance="outlined">
 
     <!-- Logo slot -->
     <div class="auth-card__logo">
@@ -7,17 +7,17 @@
     </div>
 
     <!-- Heading -->
-    <div class="auth-card__header">
-      <h1 class="jp-heading-xl">{{ title }}</h1>
+    <mat-card-header class="auth-card__header">
+      <mat-card-title class="jp-heading-xl">{{ title }}</mat-card-title>
       @if (subTitle) {
-        <p  class="jp-description">{{ subTitle }}</p>
+        <mat-card-subtitle class="jp-description">{{ subTitle }}</mat-card-subtitle>
       }
-    </div>
+    </mat-card-header>
 
     <!-- Form body -->
-    <div class="auth-card__body">
+    <mat-card-content class="auth-card__body">
       <ng-content />
-    </div>
+    </mat-card-content>
 
-  </div>
+  </mat-card>
 </div>

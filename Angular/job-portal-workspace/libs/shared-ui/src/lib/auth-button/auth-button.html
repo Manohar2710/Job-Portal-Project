@@ -1,13 +1,21 @@
 <button
+  mat-flat-button
+  color="primary"
   class="auth-btn"
   type="submit"
-  [class.auth-btn--loading]="loading"
   [disabled]="isDisabled"
   [attr.aria-busy]="loading"
   [attr.aria-disabled]="isDisabled"
 >
   @if (loading) {
-    <span class="auth-btn__spinner" aria-hidden="true"></span>
+    <span class="auth-btn__spinner">
+      <mat-progress-spinner
+        diameter="18"
+        strokeWidth="2"
+        mode="indeterminate"
+        color="accent"
+      />
+    </span>
   }
-  <span class="auth-btn__label">{{ label }}</span>
+  {{ label }}
 </button>

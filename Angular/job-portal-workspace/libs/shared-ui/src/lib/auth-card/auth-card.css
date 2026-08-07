@@ -8,15 +8,17 @@
   background-color: var(--jp-bg);
 }
 
-/* Card shell */
+/* Card shell — override Material card defaults with JP tokens */
 .auth-card {
   width: 100%;
-  max-width: 26rem;           /* 416px — comfortable form width */
-  background-color: var(--jp-surface);
-  border: 1px solid var(--jp-border);
-  border-radius: var(--jp-radius);
-  box-shadow: var(--jp-shadow);
-  padding: var(--jp-space-xl) var(--jp-space-xl) var(--jp-space-2xl);
+  max-width: 26rem; /* 416px */
+
+  /* Push Material's default padding aside and use ours */
+  padding: var(--jp-space-xl) var(--jp-space-xl) var(--jp-space-2xl) !important;
+
+  /* Align border-radius + shadow with design tokens */
+  border-radius: var(--jp-radius) !important;
+  box-shadow: var(--jp-shadow) !important;
 }
 
 /* Logo slot — centred, optional */
@@ -26,28 +28,33 @@
   margin-bottom: var(--jp-space-lg);
 }
 
-/* Logo default icon when no slot content provided */
 .auth-card__logo:empty {
   display: none;
 }
 
-/* Header block */
+/* Header block — mat-card-header adds flex-row by default; override to column */
 .auth-card__header {
-  text-align: center;
-  margin-bottom: var(--jp-space-xl);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 0 !important;          /* remove Material's header padding */
+  margin-bottom: var(--jp-space-xl) !important;
 }
 
-.auth-card__title {
-  font-size: var(--jp-font-size-2xl);
-  font-weight: 700;
-  color: var(--jp-text);
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+/* Remove Material's default title/subtitle margins */
+.auth-card__header mat-card-title,
+.auth-card__header mat-card-subtitle {
+  margin: 0 !important;
+}
+
+.auth-card__header mat-card-subtitle {
+  margin-top: var(--jp-space-xs) !important;
 }
 
 /* Body — vertical stack of form fields */
 .auth-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--jp-space-md);
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--jp-space-md) !important;
+  padding: 0 !important;
 }
