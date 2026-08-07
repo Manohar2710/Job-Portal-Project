@@ -21,7 +21,10 @@
     <modules>
         <module>common-module</module>
         <module>security-module</module>
+        <module>security-service</module>
         <module>job-service</module>
+        <module>application-service</module>
+        <module>api-gateway</module>
     </modules>
     
     <properties>

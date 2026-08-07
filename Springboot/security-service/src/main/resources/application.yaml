@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: security-service
+  flyway:
+    # The security schema (users, refresh_tokens) is owned and migrated by the
+    # other services (job-service, application-service) that depend on
+    # security-module. The security-service must NOT run those migrations again —
+    # they are already applied and the tables/indexes already exist.
+    enabled: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/job_portal_db
+    username: postgres
+    password: "0000"
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+server:
+  port: 8081
+
+security:
+  jwt:
+    secretKey: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration: 120000
+    refresh-expiration: 604800000
+    issuer: job-portal-service
+  cors:
+    allowed-origins:
+      - http://localhost:4200
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

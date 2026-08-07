@@ -1,8 +1,28 @@
 spring:
     flyway:
        enabled: true
+       # Unique path — avoids collision with security-module's db/migration entries
+       # which also live under classpath:db/migration in the fat JAR.
+       locations: classpath:db/job-migration
+       table: flyway_schema_history_job
     application:
         name: job-portal-service
+
+    # ── Redis Cache ──────────────────────────────────────────────────────────
+    data:
+        redis:
+            host: localhost
+            port: 6379
+            timeout: 2000ms
+            # Lazy connection: the pool is not acquired until the first command.
+            # This prevents startup failure when Redis is not yet available.
+            lettuce:
+                pool:
+                    enabled: false       # disable commons-pool (not on classpath)
+    cache:
+        # Set to 'redis' in production when Redis is available.
+        # Set to 'none' for local development without Redis (uses in-memory ConcurrentMap).
+        type: none
 
     datasource:
         driver-class-name: org.postgresql.Driver
@@ -14,13 +34,16 @@ spring:
             ddl-auto: validate
         show-sql: false  # SQL logging is handled by logback-spring.xml (org.hibernate.SQL logger)
         open-in-view: false # OpenInView set with false as with true/default
-        # springboot will keep the db session open for every http request 
-        # even during data serializationn  
+        # springboot will keep the db session open for every http request
+        # even during data serializationn
+
+server:
+    port: 8082
 
 security:
     jwt:
         secretKey: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970 # 256-bit Base64
-        expiration: 120000 #2 min in mili seconds
+        expiration: 86400000 # 24 hours (was 2 min — extended for local dev)
         refresh-expiration: 604800000 # 7 days
         issuer: job-portal-service
     cors:
@@ -43,7 +66,7 @@ security:
 # request gets a traceId in logs.  Lower this in high-volume production if needed.
 management:
     server:
-        port: 8081          # expose actuator on a separate port (not reachable via public ingress)
+        port: 8085          # expose actuator on a separate port (not reachable via public ingress)
     tracing:
         sampling:
             probability: 1.0
