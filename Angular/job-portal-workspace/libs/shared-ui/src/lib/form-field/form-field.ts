@@ -4,6 +4,9 @@ import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
+function toUpperCase(value: string | undefined): string {
+  return value?.toUpperCase() ?? '';
+}
 @Component({
   selector: 'ui-form-field',
   imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
@@ -11,7 +14,7 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './form-field.css',
 })
 export class FormField {
-  @Input() label: string = '';
+  @Input({required: true, transform: toUpperCase}) label: string = '';
   @Input() type: string = '';       // text | email | password
   @Input() placeholder: string = '';
   @Input() control!: AbstractControl;
