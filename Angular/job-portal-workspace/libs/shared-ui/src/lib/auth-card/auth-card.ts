@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, ContentChild, Input } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
@@ -9,6 +10,8 @@ import { MatCardModule } from '@angular/material/card';
   styleUrl: './auth-card.css',
 })
 export class AuthCard {
-  @Input() title: string = '';
+  @Input({required: true}) title: string = '';
   @Input() subTitle: string = '';
+
+  @ContentChild(ReactiveFormsModule) form! : ReactiveFormsModule;
 }

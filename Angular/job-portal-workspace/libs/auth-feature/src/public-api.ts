@@ -2,8 +2,18 @@
  * Public API Surface of auth-feature
  */
 
-export * from './lib/auth-feature';
-export * from './lib/login-card/login-card';
+export * from './lib/components/auth-feature';
+export * from './lib/components/login-card/login-card';
 export * from './lib/auth.service';
 export * from './lib/auth.interceptor';
-export * from './lib/auth.guard';
+export * from './lib/guards/auth.guard';
+export * from './lib/components/register-form/register-form';
+
+// services
+
+export * from './lib/services/user-store-service'
+export * from './lib/services/user-store-service-with-bs'
+
+// guards
+export * from './lib/guards/auth.guard-learning'
+export * from './lib/guards/unsave-changes-guard'

@@ -1,12 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AuthenticationService, LoginRequest } from '../../../../../../libs/job-portal-api';
+import { UserStoreService, UserStoreServiceWithBS } from 'auth-feature';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.html',
   styleUrl: './home.scss',
+  imports: [CommonModule]
 })
 export class HomeComponent {
+
+    // inject userstate signal example
+    userStateService = inject(UserStoreService);
+
+    // inject user state behavioral subject example
+    userStateWithBS = inject(UserStoreServiceWithBS)
 
     constructor(private authApi: AuthenticationService){
       

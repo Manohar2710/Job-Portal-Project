@@ -21,5 +21,18 @@
             label="Sign In"
             [loading]="isLoading"
         />
+        @if(serverError && (countDown$ | async) !== null) {
+            @let count = countDown$ | async;
+            <span>
+                Wait {{count}} before trying again
+            </span>
+        }
+        <div>
+            {{stringForTruncatePipe | uiTruncate: 10: '.......'}}
+        </div>
+        <ui-auth-button  uiHighlightOnHover
+            label="Register"
+        />
+
     </form>
 </ui-auth-card>
