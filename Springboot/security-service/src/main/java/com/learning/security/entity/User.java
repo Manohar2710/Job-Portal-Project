@@ -18,7 +18,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +29,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User implements UserDetails{
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,10 +69,6 @@ public class User implements UserDetails{
     @Builder.Default
     @Column(nullable = false)
     private boolean credentialsNonExpired = true;
-    
-
-    // UserDetails contract
-    
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -89,5 +84,4 @@ public class User implements UserDetails{
     public String getPassword() {
         return password;
     }
-
 }

@@ -26,5 +26,4 @@ public record RegisterRequest(
     String phone,
     @Schema(example = "ROLE_RECRUITER")
     Role role
-) {
-}
+) {}

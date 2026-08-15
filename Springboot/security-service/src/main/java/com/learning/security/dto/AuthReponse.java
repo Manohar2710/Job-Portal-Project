@@ -9,13 +9,10 @@ public record AuthReponse(
     Long expiresIn,
     UserInfo user
 ) {
-
     public record UserInfo(
         Long id,
         String firstname,
         String lastname,
         List<String> roles
-    ) {
-    }
-
+    ) {}
 }

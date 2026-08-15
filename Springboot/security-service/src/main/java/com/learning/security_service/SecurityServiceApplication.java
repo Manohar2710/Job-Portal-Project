@@ -13,10 +13,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * in the security-module JAR, so the full com.learning.security package
  * (AuthController, SecurityConfig, JwtAuthenticationFilter, etc.) is registered here.
  */
-@SpringBootApplication(scanBasePackages = {
-    "com.learning.security_service",
-    "com.learning.common"
-})
+// security-service owns its own auth classes (AuthController, services, entities).
+// The shared security-module provides only JWT validation via auto-configuration.
+// We scan both the local security_service package AND the com.learning.security
+// packages where our auth classes live.
+@SpringBootApplication
 public class SecurityServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(SecurityServiceApplication.class, args);

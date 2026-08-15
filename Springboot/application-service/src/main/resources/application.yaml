@@ -9,7 +9,6 @@ spring:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
 
   # ── Primary datasource: PostgreSQL (applications, resumes, notes, security) ──
   # Bound via @ConfigurationProperties("spring.datasource.primary") in PrimaryDataSourceConfig
@@ -22,10 +21,7 @@ spring:
 
   jpa:
     hibernate:
-      # Flyway owns all schema creation/migration — Hibernate must NOT attempt to
-      # create, alter, or validate tables. Use 'none' to fully delegate to Flyway.
-      # 'validate' would race against Flyway on a fresh DB and always fail.
-      ddl-auto: none
+      ddl-auto: update
     open-in-view: false
     show-sql: false
 
@@ -75,4 +71,3 @@ logging:
     root: INFO
     com.learning: DEBUG
     org.hibernate.SQL: WARN
-    org.flywaydb: INFO

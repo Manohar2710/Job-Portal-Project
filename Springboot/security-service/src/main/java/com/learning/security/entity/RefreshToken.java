@@ -24,12 +24,10 @@ import lombok.NoArgsConstructor;
 @Table(name = "refresh_tokens")
 public class RefreshToken {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // EAGER fetch: a RefreshToken without its User is never useful.
-    // Avoids LazyInitializationException when getUser() is called after
-    // the Hibernate session that loaded this entity has already closed.
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

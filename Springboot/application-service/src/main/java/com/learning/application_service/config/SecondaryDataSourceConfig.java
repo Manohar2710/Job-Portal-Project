@@ -4,7 +4,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -31,8 +30,6 @@ import lombok.extern.slf4j.Slf4j;
  *
  * YAML binding: app.datasource.secondary.*
  * (Custom root prefix avoids the Spring YAML sibling-key collision under spring.datasource)
- *
- * Flyway migrations: classpath:db/audit-migration  (MySQL DDL)
  *
  * Use @Transactional("secondaryTransactionManager") to write to this datasource.
  *
@@ -88,7 +85,7 @@ public class SecondaryDataSourceConfig {
             @Qualifier("secondaryDataSource") DataSource dataSource) {
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setGenerateDdl(false);   // Flyway owns DDL — Hibernate must not touch it
+        vendorAdapter.setGenerateDdl(false);
 
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);
@@ -96,17 +93,16 @@ public class SecondaryDataSourceConfig {
         emf.setPersistenceUnitName("secondary");
         emf.setJpaVendorAdapter(vendorAdapter);
 
-        // Hibernate 6.6 requires BOTH the dialect AND the boot metadata flag.
-        // "hibernate.dialect" alone is not enough — Hibernate still tries a JDBC
-        // connection to resolve the JdbcEnvironment unless we also set
-        // "hibernate.boot.allow_jdbc_metadata_access=false".
-        // With that flag false, Hibernate skips the JDBC connection at boot entirely
-        // and trusts the explicit dialect.
+        // allow_jdbc_metadata_access=false: Hibernate skips any JDBC connection at
+        // boot for dialect/environment resolution — required because MySQL may not be
+        // running at startup.
+        // ddl-auto=none: schema management for the optional audit DB is left to the
+        // DBA / manual DDL; Hibernate will not attempt to open a connection for DDL.
         emf.setJpaPropertyMap(Map.of(
-            "hibernate.dialect",                       "org.hibernate.dialect.MySQLDialect",
-            "hibernate.boot.allow_jdbc_metadata_access", "false",
-            "hibernate.hbm2ddl.auto",                  "none",
-            "hibernate.show_sql",                      "false"
+            "hibernate.dialect",                          "org.hibernate.dialect.MySQLDialect",
+            "hibernate.boot.allow_jdbc_metadata_access",  "false",
+            "hibernate.hbm2ddl.auto",                     "none",
+            "hibernate.show_sql",                         "false"
         ));
 
         return emf;
@@ -120,31 +116,4 @@ public class SecondaryDataSourceConfig {
         return new JpaTransactionManager(emf);
     }
 
-    // ── Flyway ────────────────────────────────────────────────────────────────
-
-    /**
-     * Runs MySQL migrations on startup.
-     *
-     * Fault-tolerant: if MySQL is not reachable (e.g. during local dev when only
-     * Postgres is running), migration failure is logged as a WARNING and the
-     * application starts normally. Audit writes will fail at runtime until MySQL
-     * comes back up — but the primary (PostgreSQL) service stays healthy.
-     */
-    @Bean
-    public Flyway secondaryFlyway() {
-        Flyway flyway = Flyway.configure()
-                .dataSource(secondaryDataSource())
-                .locations("classpath:db/audit-migration")
-                .table("flyway_schema_history_audit")
-                .load();
-        try {
-            flyway.migrate();
-            log.info("Secondary (MySQL) Flyway migration completed successfully");
-        } catch (Exception ex) {
-            log.warn("Secondary (MySQL) Flyway migration failed — MySQL may not be running. " +
-                     "Audit logging will be unavailable until MySQL is reachable. Error: {}",
-                     ex.getMessage());
-        }
-        return flyway;
-    }
 }

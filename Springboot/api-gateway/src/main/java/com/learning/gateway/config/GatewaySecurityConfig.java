@@ -14,6 +14,8 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
+
 import javax.crypto.SecretKey;
 
 /**
@@ -79,6 +81,12 @@ public class GatewaySecurityConfig {
 
             private SecretKey signingKey() {
                 return Keys.hmacShaKeyFor(Decoders.BASE64.decode(props.getSecretKey()));
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public List<String> extractRoles(String token) {
+                return extractClaim(token, claims -> (List<String>) claims.getOrDefault(token, List.of()));
             }
         };
     }

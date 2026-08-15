@@ -1,11 +1,13 @@
 package com.learning.security.filter;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,26 +22,36 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-
+/**
+ * Stateless JWT authentication filter — shared by every microservice that imports
+ * security-module.
+ *
+ * Validates the Bearer token cryptographically using JwtService (HMAC-SHA256).
+ * Builds the SecurityContext Authentication entirely from token claims:
+ *   - subject  → username (email)
+ *   - "roles"  → granted authorities
+ *
+ * No database is consulted — this filter is safe to use in any service
+ * regardless of whether it has a UserRepository.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-// Using OncePerRequestFilter as we are using spring-boot-starter-web dependency.
-// Use WebFilter instead if Spring WebFlux is ever added.
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
+
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Read the Authorization header
         final String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
-        // 2. Skip filter if header is absent or doesn't start with "Bearer "
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             log.debug("No Bearer token on request [{} {}] — skipping JWT filter",
                     request.getMethod(), request.getRequestURI());
@@ -47,40 +59,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 3. Strip "Bearer " prefix to get the raw token (value is never logged)
         final String jwt = authHeader.substring(BEARER_PREFIX.length());
 
         try {
-            // 4. Extract username from token
             final String username = jwtService.extractUsername(jwt);
 
-            // 5. Only authenticate if username is present and no auth is set yet
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // 6. Load full UserDetails from the database
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // 7. Validate the token against the loaded user
+                // Build authorities from the "roles" claim — no DB call
+                List<SimpleGrantedAuthority> authorities = jwtService.extractRoles(jwt)
+                        .stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .toList();
+
+                // Minimal UserDetails from claims only — password unused for JWT validation
+                UserDetails userDetails = User.withUsername(username)
+                        .password("")
+                        .authorities(authorities)
+                        .build();
+
                 if (jwtService.isTokenValid(jwt, userDetails)) {
-                    // 8. Build an authenticated token with granted authorities
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,                        // credentials — null for JWT (stateless)
-                                    userDetails.getAuthorities()
-                            );
-                    // 9. Attach request details (IP, session) to the authentication
+                                    userDetails, null, authorities);
                     authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-
-                    // 10. Store in SecurityContext so downstream filters/controllers see it
+                            new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     log.debug("JWT validated — user: '{}', URI: [{} {}]",
                             username, request.getMethod(), request.getRequestURI());
                 }
             }
         } catch (JwtException ex) {
-            // Invalid / expired / tampered token — clear context and return 401
             log.warn("Invalid JWT token on [{} {}]: {}",
                     request.getMethod(), request.getRequestURI(), ex.getMessage());
             SecurityContextHolder.clearContext();
@@ -88,8 +97,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 11. Continue the filter chain
         filterChain.doFilter(request, response);
     }
-
 }
