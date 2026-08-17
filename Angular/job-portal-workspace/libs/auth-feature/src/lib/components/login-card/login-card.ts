@@ -73,4 +73,8 @@ export class LoginCard {
       },
     });
   }
+
+  navigateToRegisterScreen(){
+    this.router.navigate(['./register'])
+  }
 }

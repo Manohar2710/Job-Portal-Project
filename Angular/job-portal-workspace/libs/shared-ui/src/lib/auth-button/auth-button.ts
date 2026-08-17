@@ -1,4 +1,4 @@
-import { Component, HostBinding, HostListener, inject, Input } from '@angular/core';
+import { Component, EventEmitter, HostBinding, HostListener, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -26,6 +26,8 @@ export class AuthButton {
   @Input() label: string = 'Submit';
   @Input() loading: boolean = false;
   @Input() disabled: boolean = false;
+  @Input() isSubmit: boolean = false;
+  @Output() onButtonClick = new EventEmitter();
   active: boolean = false;
 
   ngOninit() {
@@ -37,6 +39,7 @@ export class AuthButton {
 
   onClick() {
     console.log("Button Clicked ");
+    this.onButtonClick.emit();
   }
 
   onMouseEnter() {
@@ -47,9 +50,9 @@ export class AuthButton {
   @HostBinding('class.is-active') isActive = false
 
   // legacy hostlistner
-  @HostListener('click', ['$event']) 
-  handleClick(event: MouseEvent) {
-    console.log("legacy mouse event clicked")
-  }
+  // @HostListener('click', ['$event']) 
+  // handleClick(event: MouseEvent) {
+  //   console.log("legacy mouse event clicked")
+  // }
 
 }

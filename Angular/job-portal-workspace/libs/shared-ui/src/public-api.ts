@@ -7,6 +7,7 @@ export * from './lib/shared-ui';
 export * from './lib/auth-card/auth-card'
 export * from './lib/form-field/form-field'
 export * from './lib/auth-button/auth-button'
+export * from './lib/components/reative-form-sample/reative-form-sample'
 
 // directives
 export * from './lib/directives/highlight-on-hover'

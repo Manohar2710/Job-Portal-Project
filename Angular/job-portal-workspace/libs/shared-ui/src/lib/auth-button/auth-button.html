@@ -2,7 +2,7 @@
   mat-flat-button
   color="primary"
   class="auth-btn"
-  type="submit"
+  [type]="isSubmit ? 'submit' : 'button'"
   [disabled]="isDisabled"
   [attr.aria-busy]="loading"
   [attr.aria-disabled]="isDisabled"

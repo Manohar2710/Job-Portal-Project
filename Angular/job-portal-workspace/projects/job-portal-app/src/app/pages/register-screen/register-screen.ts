@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { RegisterForm } from 'auth-feature';
+import { ReativeFormSample } from 'shared-ui';
 @Component({
   selector: 'app-register-screen',
-  imports: [RegisterForm],
+  imports: [ReativeFormSample],
   templateUrl: './register-screen.html',
   styleUrl: './register-screen.scss',
 })
