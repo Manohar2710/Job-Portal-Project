@@ -9,10 +9,10 @@ import { catchError, switchMap, throwError } from "rxjs";
  * Requests to these URLs are passed through untouched.
  */
 const PUBLIC_ENDPOINTS = [
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/refresh',   // carries its own refresh token in the body
-  '/api/auth/logout',    // ditto
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/refresh',   // carries its own refresh token in the body
+    '/api/auth/logout',    // ditto
 ];
 
 function isPublicEndpoint(reg: HttpRequest<unknown>): boolean {
@@ -21,9 +21,9 @@ function isPublicEndpoint(reg: HttpRequest<unknown>): boolean {
 
 function attachToken(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
     console.log("authInterceptor 6")
-  return req.clone({
-    setHeaders: { Authorization: `Bearer ${token}` },
-  });
+    return req.clone({
+        setHeaders: { Authorization: `Bearer ${token}` },
+    });
 }
 
 /**
@@ -45,22 +45,22 @@ export const authInterceptor: HttpInterceptorFn = (
     const authService = inject(AuthService);
 
     // return req if no access token required
-    if(isPublicEndpoint(req)) {
+    if (isPublicEndpoint(req)) {
         return next(req);
     }
 
     // attach access token to req
     const token = authService.getAccessToken();
-    const authReq = token ? attachToken(req, token): req;
+    const authReq = token ? attachToken(req, token) : req;
 
     return next(authReq).pipe(
         catchError((err: unknown) => {
-                console.log("authInterceptor 2")
+            console.log("authInterceptor 2")
 
-            if(!(err instanceof HttpErrorResponse) || err.status !== 401) {
+            if (!(err instanceof HttpErrorResponse) || err.status !== 401) {
                 console.log("authInterceptor 3")
 
-                console.log("dsdddsdssd",err)
+                console.log("dsdddsdssd", err)
                 return throwError(() => err);
             }
             console.log("authInterceptor 5")

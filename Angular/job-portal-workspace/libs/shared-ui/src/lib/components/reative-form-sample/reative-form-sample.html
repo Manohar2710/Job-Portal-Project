@@ -1,0 +1,121 @@
+<p>reative-form-sample works!</p>
+<div>
+    <h1>Reactive Form Example</h1>
+
+    <form [formGroup]="userForm" (submit)="onSubmit()">
+        <!-- User name field -->
+        <div class="user-form-field">
+            <label> <strong>User Name</strong></label>
+            <input formControlName="userName" type="text" />
+            @if (
+            userForm.controls.userName.touched
+            ) {
+            <div class="username-error" style="color: red">
+                @if (userForm.controls.userName.errors?.['required']) {<span> username is required</span>}
+                @if (userForm.controls.userName.errors?.['minlength']) {<span> username is required with min 3
+                    characters</span>}
+                @if (userForm.controls.userName.errors?.['noSpace']) {<span> Space are not allowed</span>}
+                @if (userForm.controls.userName.errors?.['usernameTaken']) {<span> User name already taken</span>}
+
+            </div>
+            }
+        </div>
+        <!-- 1. Parent Control: Role Toggle -->
+        <div style="margin-bottom: 12px; background: #eef; padding: 10px;">
+            <label><strong>Account Type (valueChanges Trigger):</strong></label><br />
+            <select formControlName="role">
+                <option value="user">Standard User</option>
+                <option value="company">Company / Business</option>
+            </select>
+        </div>
+
+        <!-- 2. Dependent Field: Tax ID (Dynamically required via valueChanges) -->
+        @if(userForm.controls.role.value === 'company') {
+        <div style="margin-bottom: 12px;">
+            <label><strong>Company Tax ID:</strong></label><br />
+            <input type="text" formControlName="taxId" />
+            @if(userForm.controls.taxId.touched && userForm.controls.taxId.errors?.['required']) {
+            <div style="color: red;">
+                Tax ID is required for corporate accounts.
+            </div>
+            }
+        </div>
+        }
+        <!-- Nester Address field -->
+        <div class="nester-address-field" formGroupName="address">
+            <h4>Address Fields</h4>
+            <label><strong>City</strong></label>
+            <input formControlName="city" type="text" />
+            <label><strong>ZipCode</strong></label>
+            <input formControlName="zipCode" type="text" />
+        </div>
+
+        <!-- form array example -->
+        <div class="skills-list">
+            <h4>Skills (Form array)</h4>
+            <div formArrayName="skills">
+                @for (item of getSkills.controls; track $index; let i = $index) {
+                <input [id]="'skills-'+i" type="text" [formControlName]="i" placeholder="ex. Angular"
+                    [value]="item.getRawValue" />
+                <button type="button" (click)="removeSkill(i)" [disabled]="getSkills.length <= 1">Remove Skill</button>
+                }
+
+            </div>
+            <div class="add-skills-block">
+                <button type="button" (click)="addSkill()">+ Add Skill</button>
+            </div>
+        </div>
+
+        <!-- stand alone outside form control -->
+        <div>
+            <input id="terms-checkbox" type="checkbox" [formControl]="acceptTermsAndConditions" />
+            I accept the terms and conditions (Standalone FormControl)
+        </div>
+        <!-- Dynamic FormArray Section -->
+        <div style="border: 1px solid #ccc; padding: 15px; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0;">Work History</h4>
+                <button type="button" (click)="addExperience()">+ Add Experience</button>
+            </div>
+
+            <!-- Bind FormArray -->
+            <div formArrayName="experiences">
+                @for (expGroup of experiences.controls;  track $index; let i = $index) {
+                    <div  [formGroupName]="i"
+                        style="background: #f9f9f9; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>Experience #{{ i + 1 }}</strong>
+                            <button type="button" (click)="removeExperience(i)" [disabled]="experiences.length <= 1">
+                                Delete
+                            </button>
+                        </div>
+
+                        <!-- Company Field -->
+                        <div style="margin-top: 8px;">
+                            <label>Company:</label><br />
+                            <input type="text" formControlName="company" />
+                            @if(getExpControl(i, 'company').touched && getExpControl(i, 'company').invalid) {                            
+                                <div
+                                    style="color: red;">
+                                    Company name is required.
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Role Field -->
+                        <div style="margin-top: 8px;">
+                            <label>Role:</label><br />
+                            <input type="text" formControlName="role" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <button type="submit"> SUBMUT</button>
+    </form>
+    <!-- Displaying Typed Values -->
+    <hr />
+    <h3>Form State (getRawValue):</h3>
+    <pre>{{ userForm.getRawValue() | json }}</pre>
+    <p><strong>Terms Accepted:</strong> {{ acceptTermsAndConditions.value }}</p>
+</div>

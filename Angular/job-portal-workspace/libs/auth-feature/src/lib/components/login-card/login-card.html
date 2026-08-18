@@ -30,8 +30,8 @@
         <div>
             {{stringForTruncatePipe | uiTruncate: 10: '.......'}}
         </div>
-        <ui-auth-button  uiHighlightOnHover
-            label="Register"
+        <ui-auth-button  uiHighlightOnHover [isSubmit]="false"
+            label="Register" (onButtonClick)="navigateToRegisterScreen()"
         />
 
     </form>

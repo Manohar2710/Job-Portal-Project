@@ -32,7 +32,7 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./pages/login-page/login-page').then((m) => m.LoginPage),
+      import('./pages/login-with-template-form/login-with-template-form').then((m) => m.LoginWithTemplateForm),
   },
   {
     path: 'register',
@@ -51,7 +51,7 @@ export const routes: Routes = [
   },
 
     // redirectTo example with patchMatch full
-  {
-    path: '', redirectTo: 'home', pathMatch: 'full'
-  }
+  // {
+  //   path: '', redirectTo: 'home', pathMatch: 'full'
+  // }
 ];

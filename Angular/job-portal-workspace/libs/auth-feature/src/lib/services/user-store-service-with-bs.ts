@@ -11,7 +11,7 @@ export interface UserProfileForBS {
 })
 export class UserStoreServiceWithBS {
 
-
+  // Hot Observables
   // initialise the behavioral subject with type UserProfile
   private userSubject = new BehaviorSubject<UserProfileForBS>({name: 'Guest', isLoggedIn: false});
 
@@ -26,6 +26,6 @@ export class UserStoreServiceWithBS {
   }
 
   logout() {
-    this.userSubject.next({name: 'Guest', isLoggedIn: false});
+    this.userSubject.next({name: '%Guest', isLoggedIn: false});
   }
 }
