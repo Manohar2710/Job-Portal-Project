@@ -43,9 +43,12 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAnimationsAsync(),
+
+    // configuring http interceptor
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
+    
     provideApi(environment.apiUrl),
     // Injecting using the useValue paramenter in the provider example
     {

@@ -1,0 +1,54 @@
+<ui-auth-card title="Login">
+<div class="template-driven-login-form">
+        <form #userGroup="ngForm" (ngSubmit)="onSubmit()">
+            <div ngModelGroup="user">
+                <!-- user ID -->
+                <div class="form-fields">
+                    <mat-label>
+                        Username
+                    </mat-label>
+                    <input
+                    type="text"
+                    [(ngModel)]="userModel.user.username"
+                    required
+                    #usernameInput="ngModel"
+                    name="username"
+                    id="username"
+                    minlength="4"
+                    />
+                </div>
+                @if (usernameInput.invalid && (usernameInput.dirty || usernameInput.touched)) {
+                    @if(usernameInput.errors?.['required']) {
+                        <small>Username is required</small>
+                    }
+                }
+
+                <!-- password -->
+                <div class="form-fields">
+                    <label>
+                        Password
+                    </label>
+                    <input
+                    id="password"
+                    name="password"
+                    [(ngModel)]="userModel.user.password"
+                    #passwordInput="ngModel"
+                    required
+                    pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
+                    type="password"
+                    />
+                </div>
+                @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
+                    @if (passwordInput.errors?.['required']) {
+                        <small> password is required</small>
+                    }
+                    @if (passwordInput.errors?.['pattern']) {
+                        <small>Please enter valid password</small>
+                    }
+                }
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        
+</div>
+</ui-auth-card>

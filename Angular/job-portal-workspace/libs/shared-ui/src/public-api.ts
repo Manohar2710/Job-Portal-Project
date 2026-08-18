@@ -17,3 +17,7 @@ export * from './lib/pipes/truncate'
 
 // Services
 export * from './lib/services/theme'
+export * from './lib/utils/rx-jscommon-operartors'
+export * from './lib/utils/rx-jssubject-types'
+
+
