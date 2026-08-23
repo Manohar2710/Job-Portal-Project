@@ -9,12 +9,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.learning.application_service.audit.entity.ApplicationAuditLog;
+import com.learning.application_service.audit.repository.ApplicationAuditLogRepository;
 import com.learning.application_service.dto.ApplicationRequest;
 import com.learning.application_service.dto.ApplicationResponse;
 import com.learning.application_service.dto.ResumeResponse;
 import com.learning.application_service.dto.StatusUpdateRequest;
 import com.learning.application_service.entity.Application;
-import com.learning.application_service.entity.Resume;
+import com.learning.application_service.enums.ApplicationStatus;
 import com.learning.application_service.repository.ApplicationRepository;
 import com.learning.common.exception.ResourceNotFoundException;
 
@@ -27,6 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
+
+    // Bound to secondaryTransactionManager (MySQL) by SecondaryDataSourceConfig
+    private final ApplicationAuditLogRepository auditLogRepository;
 
     // -----------------------------------------------------------------------
     // Seeker operations
@@ -70,12 +75,18 @@ public class ApplicationService {
                 .map(this::map);
     }
 
-    @Transactional
+    @Transactional("primaryTransactionManager")
     public ApplicationResponse updateStatus(Long applicationId, StatusUpdateRequest req) {
         Application app = findOrThrow(applicationId);
-        log.info("Updating application id={} status={}", applicationId, req.status());
+        ApplicationStatus oldStatus = app.getStatus();
+        log.info("Updating application id={} status {} -> {}", applicationId, oldStatus, req.status());
         app.setStatus(req.status());
-        return map(applicationRepository.save(app));
+        ApplicationResponse response = map(applicationRepository.save(app));
+
+        // Write audit record to secondary (MySQL) datasource
+        writeAuditLog(applicationId, oldStatus, req.status());
+
+        return response;
     }
 
     // -----------------------------------------------------------------------
@@ -114,6 +125,31 @@ public class ApplicationService {
                 app.getAppliedAt(),
                 app.getUpdatedAt()
         );
+    }
+
+    // -----------------------------------------------------------------------
+    // Audit helper — writes to MySQL via secondaryTransactionManager
+    // -----------------------------------------------------------------------
+
+    /**
+     * Persists a status-change audit record to MySQL.
+     * Uses its own transaction on the secondary datasource so a MySQL failure
+     * does NOT roll back the primary (PostgreSQL) status update.
+     */
+    @Transactional("secondaryTransactionManager")
+    public void writeAuditLog(Long applicationId,
+                               ApplicationStatus oldStatus,
+                               ApplicationStatus newStatus) {
+        try {
+            Long userId = requireCurrentUserId();
+            ApplicationAuditLog entry = new ApplicationAuditLog(applicationId, userId, oldStatus, newStatus);
+            auditLogRepository.save(entry);
+            log.info("Audit log written: applicationId={} {} -> {} by userId={}",
+                    applicationId, oldStatus, newStatus, userId);
+        } catch (Exception ex) {
+            // MySQL being unavailable must not roll back the primary PostgreSQL status update
+            log.warn("Failed to write audit log for applicationId={}: {}", applicationId, ex.getMessage());
+        }
     }
 
     private Long requireCurrentUserId() {

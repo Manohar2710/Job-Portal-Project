@@ -94,4 +94,15 @@ public class JwtServiceImpl implements JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
+    /**
+     * function to extract roles from token for authorisation without hitting DB
+     * 
+     * */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> 
+            (List<String>) claims.getOrDefault("roles", List.of()));
+    }
 }

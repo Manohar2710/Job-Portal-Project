@@ -1,22 +1,21 @@
 spring:
   application:
     name: security-service
-  flyway:
-    # The security schema (users, refresh_tokens) is owned and migrated by the
-    # other services (job-service, application-service) that depend on
-    # security-module. The security-service must NOT run those migrations again —
-    # they are already applied and the tables/indexes already exist.
-    enabled: false
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/job_portal_db
     username: postgres
     password: "0000"
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     open-in-view: false
+
+  flyway:
+    enabled: false   # Hibernate ddl-auto manages the schema; Flyway disabled
 
 server:
   port: 8081
@@ -45,3 +44,10 @@ management:
     web:
       exposure:
         include: health,info
+
+logging:
+  level:
+    root: INFO
+    com.learning: DEBUG
+    org.hibernate.SQL: WARN
+    org.springframework.boot.autoconfigure: DEBUG
