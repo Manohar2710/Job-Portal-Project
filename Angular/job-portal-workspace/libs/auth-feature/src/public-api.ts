@@ -13,6 +13,7 @@ export * from './lib/components/register-form/register-form';
 
 export * from './lib/services/user-store-service'
 export * from './lib/services/user-store-service-with-bs'
+export * from './lib/services/user-service'
 
 // guards
 export * from './lib/guards/auth.guard-learning'

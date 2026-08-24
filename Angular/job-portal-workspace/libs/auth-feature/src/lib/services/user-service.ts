@@ -2,9 +2,9 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-interface User {
-  id: number,
-  name: string
+export interface User {
+  id?: number,
+  name?: string
 }
 @Injectable({
   providedIn: 'root',

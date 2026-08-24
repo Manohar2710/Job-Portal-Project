@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, Input } from '@angular/core';
+import { Component, ContentChild, input, Input, output } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 
@@ -10,8 +10,23 @@ import { MatCardModule } from '@angular/material/card';
   styleUrl: './auth-card.css',
 })
 export class AuthCard {
+  // Traditioal way of implementing inputs
   @Input({required: true}) title: string = '';
   @Input() subTitle: string = '';
+
+
+  // Modern way with signals
+  titleNew = input<string>('');
+  subTitleNew = input<string>('');
+
+  // singals driven required input
+  titleNewRequired = input.required<string>();
+  
+
+  // Output with modern signals
+  onClickTitle = output<string>();
+
+
 
   @ContentChild(ReactiveFormsModule) form! : ReactiveFormsModule;
 }

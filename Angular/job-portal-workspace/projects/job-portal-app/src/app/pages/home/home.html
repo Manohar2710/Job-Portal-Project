@@ -2,6 +2,7 @@
   <!-- example with signal state -->
   <h1>Welcome to the Job Portal {{userStateService.user().name}}</h1>
   <p>Status: {{userStateService.user().isLoggedIn ? 'Active' : 'In Active'}}<>
+  <p>{{computedStatement()}}</p>
   <p>Find your next opportunity.</p>
 
   <!-- example with behavioral subject -->
