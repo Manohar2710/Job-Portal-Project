@@ -32,8 +32,7 @@
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>${LOG_CHARSET}</charset>
             <pattern>
-                %clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx
-            </pattern>
+%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr([%X{requestId:-}]){yellow} %clr([%X{username:-}]){green} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx            </pattern>
         </encoder>
     </appender>
 

@@ -1,6 +1,6 @@
 spring:
     flyway:
-       enabled: true
+       enabled: false
        # Unique path — avoids collision with security-module's db/migration entries
        # which also live under classpath:db/migration in the fat JAR.
        locations: classpath:db/job-migration
@@ -31,7 +31,7 @@ spring:
         password: "0000"
     jpa:
         hibernate:
-            ddl-auto: validate
+            ddl-auto: update
         show-sql: false  # SQL logging is handled by logback-spring.xml (org.hibernate.SQL logger)
         open-in-view: false # OpenInView set with false as with true/default
         # springboot will keep the db session open for every http request
