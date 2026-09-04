@@ -93,6 +93,9 @@ public class CacheConfig {
                         base.entryTtl(Duration.ofMinutes(2)))
                 .withCacheConfiguration("jobs-mine",
                         base.entryTtl(Duration.ofMinutes(5)))
+                .withCacheConfiguration("arbeitnow-jobs",
+                        base.entryTtl(Duration.ofMinutes(1))
+                )
                 .build();
     }
 
@@ -103,6 +106,6 @@ public class CacheConfig {
     public CacheManager noOpCacheManager() {
         // ConcurrentMapCacheManager provides real caching without Redis.
         // Useful for local development when Redis is not installed.
-        return new ConcurrentMapCacheManager("job", "jobs-search", "jobs-mine");
+        return new ConcurrentMapCacheManager("job", "jobs-search", "jobs-mine", "arbeitnow-jobs");
     }
 }
