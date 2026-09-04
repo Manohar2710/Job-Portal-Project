@@ -1,6 +1,7 @@
 package com.learning.job_portal_service.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -17,12 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.learning.job_portal_service.dto.ArbitnowJobItem;
+import com.learning.job_portal_service.dto.ArbitnowResponse;
 import com.learning.job_portal_service.dto.JobRequest;
 import com.learning.job_portal_service.dto.JobResponse;
 import com.learning.job_portal_service.dto.JobSearchRequest;
 import com.learning.job_portal_service.enums.ExperienceLevel;
 import com.learning.job_portal_service.enums.JobStatus;
 import com.learning.job_portal_service.enums.JobType;
+import com.learning.job_portal_service.service.ArbeitnowService;
 import com.learning.job_portal_service.service.JobService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JobController {
 
+    private final ArbeitnowService arbeitnowService;
     private final JobService jobService;
 
     // -----------------------------------------------------------------------
@@ -107,5 +112,12 @@ public class JobController {
     public ResponseEntity<Void> deleteJob(@PathVariable Long id) {
         jobService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/external")
+    public ResponseEntity<List<ArbitnowJobItem>> getExternalJobs(
+        @RequestParam(defaultValue = "1") int page
+    ) {
+        return ResponseEntity.ok(arbeitnowService.fetchJobs(page));
     }
 }
