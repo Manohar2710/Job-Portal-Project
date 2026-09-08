@@ -52,6 +52,14 @@ spring:
           filters:
             - name: JwtAuthFilter
 
+        # ── Notification Service ───────────────────────────────────────────
+        - id: notification-service
+          uri: http://localhost:8087
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - name: JwtAuthFilter
+
       # Global CORS handled at gateway level
       globalcors:
         cors-configurations:
@@ -78,7 +86,7 @@ security:
     issuer: job-portal-service
 
 server:
-  port: 8080
+  port: 8888
 
 management:
   endpoints:

@@ -1,0 +1,98 @@
+version: '3.8'
+
+# ── Job Portal Local Infrastructure ───────────────────────────────────────────
+# Starts: Zookeeper, Kafka, and creates the required topics automatically.
+#
+# Usage:
+#   docker compose up -d          # start all containers in background
+#   docker compose down           # stop and remove containers
+#   docker compose down -v        # also remove volumes (wipes Kafka data)
+#   docker compose logs -f kafka  # tail Kafka logs
+#
+# Kafka bootstrap: localhost:9092
+# Kafka UI (browser): http://localhost:8090
+
+services:
+
+  # ── Zookeeper ────────────────────────────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: echo stat | nc localhost 2181 || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Kafka Broker ─────────────────────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"       # accessible from your host (Spring Boot services)
+      - "29092:29092"     # inter-container communication
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"   # topics auto-created on first publish
+    healthcheck:
+      test: kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ── Create topics explicitly (optional — auto-create is enabled above) ────────
+  # Having explicit topics ensures the correct partition count and replication factor.
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: [ "/bin/sh", "-c" ]
+    command: |
+      "
+      echo 'Creating Kafka topics...'
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists \
+        --topic job-events --partitions 2 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists \
+        --topic application-events --partitions 2 --replication-factor 1
+      echo 'Topics created:'
+      kafka-topics --bootstrap-server kafka:29092 --list
+      "
+    restart: "no"
+
+  # ── Kafka UI (browser-based dashboard) ───────────────────────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+  # ── Eureka Server ─────────────────────────────────────────────────────────────
+  # Uncomment if you want Eureka in Docker instead of running it from the IDE/CLI.
+  # eureka:
+  #   build: ./eureka-server
+  #   container_name: eureka-server
+  #   ports:
+  #     - "8761:8761"

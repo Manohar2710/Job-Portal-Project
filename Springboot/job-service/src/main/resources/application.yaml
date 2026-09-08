@@ -8,6 +8,13 @@ spring:
     application:
         name: job-portal-service
 
+    # ── Spring Cloud ─────────────────────────────────────────────────────────
+    # Spring Cloud 2024.0.1 officially targets Boot 3.4.x;
+    # disable the version check so this service starts on Boot 3.5.x
+    cloud:
+        compatibility-verifier:
+            enabled: false
+
     # ── Redis Cache ──────────────────────────────────────────────────────────
     data:
         redis:
@@ -37,8 +44,40 @@ spring:
         # springboot will keep the db session open for every http request
         # even during data serializationn
 
+    # ── Kafka Producer ────────────────────────────────────────────────────────
+    kafka:
+        bootstrap-servers: localhost:9092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+            acks: all
+            retries: 3
+
 server:
     port: 8082
+
+# ── Eureka client registration ─────────────────────────────────────────────
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+    instance:
+        prefer-ip-address: true
+        lease-renewal-interval-in-seconds: 10
+        lease-expiration-duration-in-seconds: 30
+
+# ── Kafka topic names ─────────────────────────────────────────────────────
+app:
+    kafka:
+        topics:
+            job-events: job-events
+
+# ── Feign client ─────────────────────────────────────────────────────────────
+feign:
+    circuitbreaker:
+        enabled: true
 
 security:
     jwt:
@@ -61,9 +100,6 @@ security:
         max-age: 3600
 
 # ─── Actuator & Tracing ───────────────────────────────────────────────────────
-# micrometer-tracing-bridge-brave populates MDC "traceId"/"spanId" on every
-# request.  Default sampling probability is 0.1 (10%); raise to 1.0 so every
-# request gets a traceId in logs.  Lower this in high-volume production if needed.
 management:
     server:
         port: 8085          # expose actuator on a separate port (not reachable via public ingress)
@@ -77,7 +113,7 @@ management:
             base-path: /actuator
     endpoint:
         health:
-            show-details: when-authorized   # full component details only for authenticated callers
+            show-details: always   # full component details only for authenticated callers
             probes:
                 enabled: true               # exposes /actuator/health/liveness and /actuator/health/readiness
     metrics:
@@ -85,11 +121,6 @@ management:
             application: ${spring.application.name}  # label every metric with the service name
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
-# These levels act as the baseline fallback.
-# logback-spring.xml <springProfile> blocks override them per active profile:
-#   dev   → com.learning=DEBUG, org.hibernate.SQL=DEBUG
-#   prod  → com.learning=INFO,  org.hibernate.SQL=WARN  (this file's values)
-#   debug → com.learning=TRACE, full framework trace
 logging:
     level:
         root: INFO
@@ -100,6 +131,7 @@ logging:
         org.hibernate.orm.jdbc.bind: WARN           # bind params off by default
         org.flywaydb: INFO                          # migration events always visible
         io.jsonwebtoken: WARN                       # JWT library internals suppressed
+        org.apache.kafka: WARN                      # Kafka client noise suppressed
         # Activated automatically by logback-spring.xml when profile=debug.
         # Listed here for visibility — has no effect unless profile=debug is active.
         org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG

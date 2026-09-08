@@ -43,6 +43,18 @@ public class JwtServiceImpl implements JwtService {
         extraClaims.put("roles", roles);
         return buildToken(extraClaims, userDetails, jwtProperties.getExpiration());
     }
+
+    /** Generates a token with an explicit userId claim embedded for downstream services. */
+    public String generateToken(UserDetails userDetails, Long userId) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        List<String> roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        extraClaims.put("roles", roles);
+        extraClaims.put("userId", userId);
+        return buildToken(extraClaims, userDetails, jwtProperties.getExpiration());
+    }
     
     /**
      * Validate the token against the supplied UserDetails.
@@ -102,7 +114,23 @@ public class JwtServiceImpl implements JwtService {
     @SuppressWarnings("unchecked")
     @Override
     public List<String> extractRoles(String token) {
-        return extractClaim(token, claims -> 
+        return extractClaim(token, claims ->
             (List<String>) claims.getOrDefault("roles", List.of()));
+    }
+
+    /**
+     * Extracts the numeric userId embedded as the "userId" claim.
+     * Returns null if the claim is absent (tokens issued before this change).
+     */
+    @Override
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> {
+            Object raw = claims.get("userId");
+            if (raw == null) return null;
+            if (raw instanceof Long l) return l;
+            if (raw instanceof Integer i) return i.longValue();
+            if (raw instanceof Number n) return n.longValue();
+            return null;
+        });
     }
 }

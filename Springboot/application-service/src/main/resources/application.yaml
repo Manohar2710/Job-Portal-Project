@@ -2,6 +2,12 @@ spring:
   application:
     name: application-service
 
+  # Spring Cloud 2024.0.1 officially targets Boot 3.4.x;
+  # disable the version check so this service starts on Boot 3.5.x
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
   # ── Disable Spring Boot datasource/JPA/Flyway auto-config ────────────────────
   # We register two datasources manually (PostgreSQL primary, MySQL secondary).
   # Auto-config expects exactly one DataSource — excluding it prevents startup errors.
@@ -25,6 +31,15 @@ spring:
     open-in-view: false
     show-sql: false
 
+  # ── Kafka Producer ────────────────────────────────────────────────────────
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+
 # ── Secondary datasource: MySQL (audit logs) ───────────────────────────────────
 # Placed at root level (not under 'spring') to avoid YAML sibling-key collision.
 # Bound via @ConfigurationProperties("app.datasource.secondary") in SecondaryDataSourceConfig.
@@ -36,8 +51,25 @@ app:
       password: "0000"
       driver-class-name: com.mysql.cj.jdbc.Driver
 
+  # ── Kafka topic names ─────────────────────────────────────────────────────
+  kafka:
+    topics:
+      application-events: application-events
+
 server:
   port: 8083
+
+# ── Eureka client registration ─────────────────────────────────────────────
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 security:
   jwt:
@@ -71,3 +103,4 @@ logging:
     root: INFO
     com.learning: DEBUG
     org.hibernate.SQL: WARN
+    org.apache.kafka: WARN

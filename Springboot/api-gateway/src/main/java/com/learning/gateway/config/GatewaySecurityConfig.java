@@ -65,6 +65,11 @@ public class GatewaySecurityConfig {
             }
 
             @Override
+            public String generateToken(UserDetails userDetails, Long userId) {
+                throw new UnsupportedOperationException("Gateway does not generate tokens");
+            }
+
+            @Override
             public boolean isTokenValid(String token, UserDetails userDetails) {
                 throw new UnsupportedOperationException("Gateway does not validate tokens against UserDetails");
             }
@@ -86,7 +91,19 @@ public class GatewaySecurityConfig {
             @SuppressWarnings("unchecked")
             @Override
             public List<String> extractRoles(String token) {
-                return extractClaim(token, claims -> (List<String>) claims.getOrDefault(token, List.of()));
+                return extractClaim(token, claims -> (List<String>) claims.getOrDefault("roles", List.of()));
+            }
+
+            @Override
+            public Long extractUserId(String token) {
+                return extractClaim(token, claims -> {
+                    Object raw = claims.get("userId");
+                    if (raw == null) return null;
+                    if (raw instanceof Long l) return l;
+                    if (raw instanceof Integer i) return i.longValue();
+                    if (raw instanceof Number n) return n.longValue();
+                    return null;
+                });
             }
         };
     }

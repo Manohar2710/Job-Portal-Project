@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: notification-service
+
+  # Spring Cloud 2024.0.1 officially targets Boot 3.4.x;
+  # disable the version check so this service starts on Boot 3.5.x
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/notification_db
+    username: postgres
+    password: "0000"
+
+  jpa:
+    hibernate:
+      ddl-auto: validate    # Flyway owns schema — JPA only validates
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/notification-migration
+    # Separate history table avoids collision if all services share the same DB
+    table: flyway_schema_history_notification
+
+  # ── Kafka consumer ────────────────────────────────────────────────────────
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.learning.*"
+
+server:
+  port: 8087
+
+# ── Eureka client registration ─────────────────────────────────────────────
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    # Heartbeat every 10 s; expire after 30 s of missed heartbeats
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+security:
+  jwt:
+    secretKey: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration: 86400000
+    refresh-expiration: 604800000
+    issuer: job-portal-service
+  cors:
+    allowed-origins:
+      - http://localhost:4200
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+# ── Kafka topic names (externalized for easy per-env override) ────────────
+app:
+  kafka:
+    topics:
+      job-events:         job-events
+      application-events: application-events
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.learning: DEBUG
+    org.hibernate.SQL: WARN
+    org.apache.kafka: WARN
