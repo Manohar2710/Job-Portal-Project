@@ -19,6 +19,7 @@ import com.learning.job_portal_service.client.JobNotificationClient;
 import com.learning.job_portal_service.dto.JobRequest;
 import com.learning.job_portal_service.dto.JobResponse;
 import com.learning.job_portal_service.dto.JobSearchRequest;
+import com.learning.job_portal_service.dto.JobWithNotificationCountResponse;
 import com.learning.job_portal_service.entity.Job;
 import com.learning.job_portal_service.entity.JobSkill;
 import com.learning.job_portal_service.enums.JobStatus;
