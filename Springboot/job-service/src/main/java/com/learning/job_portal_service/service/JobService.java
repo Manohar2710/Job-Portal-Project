@@ -1,6 +1,6 @@
 package com.learning.job_portal_service.service;
 
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,11 +15,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.learning.common.exception.ResourceNotFoundException;
+import com.learning.job_portal_service.client.JobNotificationClient;
+import com.learning.job_portal_service.client.dto.NotificationRequest;
 import com.learning.job_portal_service.dto.JobRequest;
 import com.learning.job_portal_service.dto.JobResponse;
 import com.learning.job_portal_service.dto.JobSearchRequest;
 import com.learning.job_portal_service.entity.Job;
 import com.learning.job_portal_service.entity.JobSkill;
+import com.learning.job_portal_service.enums.JobStatus;
+import com.learning.job_portal_service.kafka.KafkaJobEventPublisher;
+import com.learning.job_portal_service.kafka.event.JobEvent;
+import com.learning.job_portal_service.mapper.JobMapper;
 import com.learning.job_portal_service.repository.JobRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +36,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JobService {
 
-    private final JobRepository jobRepository;
+    private final JobRepository          jobRepository;
+    private final JobMapper              jobMapper;
+    private final KafkaJobEventPublisher kafkaPublisher;
+    private final JobNotificationClient  notificationClient;
 
     // -----------------------------------------------------------------------
     // Write operations
@@ -39,18 +48,38 @@ public class JobService {
     @Transactional
     @CacheEvict(cacheNames = {"jobs-search", "jobs-mine"}, allEntries = true)
     public JobResponse create(JobRequest req) {
-        log.info("Creating job: '{}'", req.title());
+        log.info("Creating job: '{}'", req);
 
         Long currentUserId = resolveCurrentUserId();
+        log.info("currentUserId: '{}'", currentUserId);
 
-        Job job = new Job();
-        applyRequest(job, req);
+        Job job = jobMapper.toEntity(req);
+
         job.setPostedBy(currentUserId);
         applySkills(job, req.skills());
 
         Job saved = jobRepository.save(job);
-        log.info("Job created, id={}", saved.getId());
-        return map(saved);
+        log.info("Job created id={}", saved);
+
+        // ── Async notification via Kafka ──────────────────────────────────
+        // Published after the DB transaction commits; Kafka failure does NOT
+        // roll back the job creation.
+        kafkaPublisher.publish(buildJobEvent("JOB_POSTED", saved), String.valueOf(saved.getId()));
+
+        // ── Sync notification via Feign (Eureka) ─────────────────────────
+        // Best-effort direct call to notification-service via Eureka load-balancer.
+        // The fallback handles unavailability gracefully — job creation is unaffected.
+        if (currentUserId != null) {
+            notificationClient.createNotification(new NotificationRequest(
+                    currentUserId,
+                    "JOB_POSTED",
+                    "Job '" + saved.getTitle() + "' is now live!",
+                    "Your job posting at " + saved.getCompanyName() + " is active.",
+                    saved.getId()
+            ));
+        }
+
+        return jobMapper.toResponse(saved);
     }
 
     @Transactional
@@ -62,15 +91,35 @@ public class JobService {
     public JobResponse update(Long id, JobRequest req) {
         log.info("Updating job id={}", id);
         Job job = findOrThrow(id);
-        applyRequest(job, req);
+
+        // Apply scalar fields via mapper (skills managed separately)
+        Job updated = jobMapper.toEntity(req);
+        job.setTitle(updated.getTitle());
+        job.setDescription(updated.getDescription());
+        job.setLocation(updated.getLocation());
+        job.setStatus(updated.getStatus());
+        job.setSalaryMin(updated.getSalaryMin());
+        job.setSalaryMax(updated.getSalaryMax());
+        job.setCompanyName(updated.getCompanyName());
+        job.setJobType(updated.getJobType());
+        job.setExperienceLevel(updated.getExperienceLevel());
+        job.setRemoteAllowed(updated.isRemoteAllowed());
+        job.setExpiresAt(updated.getExpiresAt());
 
         // Replace skill list
         job.getSkills().clear();
         applySkills(job, req.skills());
 
         Job saved = jobRepository.save(job);
-        log.info("Job updated, id={}", id);
-        return map(saved);
+        log.info("Job updated id={}", id);
+
+        // Determine event type: closing a job emits JOB_CLOSED, other changes emit JOB_UPDATED
+        boolean isClosed = saved.getStatus() == JobStatus.CLOSED
+                || saved.getStatus() == JobStatus.ARCHIVED;
+        String eventType = isClosed ? "JOB_CLOSED" : "JOB_UPDATED";
+        kafkaPublisher.publish(buildJobEvent(eventType, saved), String.valueOf(saved.getId()));
+
+        return jobMapper.toResponse(saved);
     }
 
     @Transactional
@@ -81,8 +130,10 @@ public class JobService {
     })
     public void delete(Long id) {
         log.info("Deleting job id={}", id);
-        jobRepository.delete(findOrThrow(id));
-        log.info("Job deleted, id={}", id);
+        Job job = findOrThrow(id);
+        jobRepository.delete(job);
+        kafkaPublisher.publish(buildJobEvent("JOB_CLOSED", job), String.valueOf(id));
+        log.info("Job deleted id={}", id);
     }
 
     // -----------------------------------------------------------------------
@@ -94,7 +145,7 @@ public class JobService {
     public JobResponse getById(Long id) {
         log.info("Fetching job id={}", id);
         jobRepository.incrementViewCount(id);
-        return map(findOrThrow(id));
+        return jobMapper.toResponse(findOrThrow(id));
     }
 
     @Transactional(readOnly = true)
@@ -115,7 +166,7 @@ public class JobService {
                 req.salaryMax(),
                 req.keyword(),
                 pageable
-        ).map(this::map);
+        ).map(jobMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -124,26 +175,13 @@ public class JobService {
     public Page<JobResponse> getMyJobs(int page, int size) {
         Long userId = resolveCurrentUserId();
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
-        return jobRepository.findByPostedByOrderByCreatedAtDesc(userId, pageable).map(this::map);
+        return jobRepository.findByPostedByOrderByCreatedAtDesc(userId, pageable)
+                .map(jobMapper::toResponse);
     }
 
     // -----------------------------------------------------------------------
     // Private helpers
     // -----------------------------------------------------------------------
-
-    private void applyRequest(Job job, JobRequest req) {
-        job.setTitle(req.title());
-        job.setDescription(req.description());
-        job.setLocation(req.location());
-        job.setStatus(req.status());
-        job.setSalaryMin(req.salaryMin());
-        job.setSalaryMax(req.salaryMax());
-        job.setCompanyName(req.companyName());
-        job.setJobType(req.jobType());
-        job.setExperienceLevel(req.experienceLevel());
-        job.setRemoteAllowed(req.remoteAllowed());
-        job.setExpiresAt(req.expiresAt());
-    }
 
     private void applySkills(Job job, List<String> skills) {
         if (skills == null) return;
@@ -158,34 +196,22 @@ public class JobService {
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found with id: " + id));
     }
 
-    private JobResponse map(Job job) {
-        List<String> skills = job.getSkills() == null
-                ? Collections.emptyList()
-                : job.getSkills().stream().map(JobSkill::getSkill).toList();
-
-        return new JobResponse(
+    private JobEvent buildJobEvent(String eventType, Job job) {
+        return new JobEvent(
+                eventType,
                 job.getId(),
                 job.getTitle(),
-                job.getDescription(),
+                job.getCompanyName(),
                 job.getLocation(),
-                job.getStatus(),
                 job.getSalaryMin(),
                 job.getSalaryMax(),
                 job.getPostedBy(),
-                job.getCompanyName(),
-                job.getJobType(),
-                job.getExperienceLevel(),
-                job.isRemoteAllowed(),
-                job.getExpiresAt(),
-                job.getViewCount(),
-                skills,
-                job.getCreatedAt(),
-                job.getUpdatedAt()
+                LocalDateTime.now()
         );
     }
 
     /** Extracts the numeric user-id stored as the JWT subject. */
-    private Long resolveCurrentUserId() {
+    public Long resolveCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return null;

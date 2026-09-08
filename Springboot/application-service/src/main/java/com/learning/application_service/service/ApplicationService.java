@@ -1,6 +1,6 @@
 package com.learning.application_service.service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,10 +13,12 @@ import com.learning.application_service.audit.entity.ApplicationAuditLog;
 import com.learning.application_service.audit.repository.ApplicationAuditLogRepository;
 import com.learning.application_service.dto.ApplicationRequest;
 import com.learning.application_service.dto.ApplicationResponse;
-import com.learning.application_service.dto.ResumeResponse;
 import com.learning.application_service.dto.StatusUpdateRequest;
 import com.learning.application_service.entity.Application;
 import com.learning.application_service.enums.ApplicationStatus;
+import com.learning.application_service.kafka.KafkaApplicationEventPublisher;
+import com.learning.application_service.kafka.event.ApplicationEvent;
+import com.learning.application_service.mapper.ApplicationMapper;
 import com.learning.application_service.repository.ApplicationRepository;
 import com.learning.common.exception.ResourceNotFoundException;
 
@@ -28,10 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ApplicationService {
 
-    private final ApplicationRepository applicationRepository;
-
-    // Bound to secondaryTransactionManager (MySQL) by SecondaryDataSourceConfig
-    private final ApplicationAuditLogRepository auditLogRepository;
+    private final ApplicationRepository          applicationRepository;
+    private final ApplicationAuditLogRepository  auditLogRepository;
+    private final KafkaApplicationEventPublisher kafkaPublisher;
+    private final ApplicationMapper              applicationMapper;
 
     // -----------------------------------------------------------------------
     // Seeker operations
@@ -45,14 +47,29 @@ public class ApplicationService {
             throw new IllegalStateException("You have already applied to this job.");
         }
 
-        Application app = new Application();
-        app.setJobId(req.jobId());
+        // Use mapper to convert request → entity, then set server-managed fields
+        Application app = applicationMapper.toEntity(req);
         app.setApplicantUserId(userId);
-        app.setCoverLetter(req.coverLetter());
 
         Application saved = applicationRepository.save(app);
         log.info("Application created id={} userId={} jobId={}", saved.getId(), userId, req.jobId());
-        return map(saved);
+
+        // ── Async Kafka event — notify notification-service ──────────────
+        // Published after the entity is persisted; Kafka failure does NOT roll back the save.
+        // recruiterUserId is not available here without a cross-service lookup;
+        // notification-service can enrich this from its own data if needed.
+        kafkaPublisher.publish(new ApplicationEvent(
+                "APPLICATION_RECEIVED",
+                saved.getId(),
+                saved.getJobId(),
+                userId,
+                null,        // recruiterUserId — enriched by notification-service
+                null,        // oldStatus
+                saved.getStatus().name(),
+                LocalDateTime.now()
+        ), String.valueOf(saved.getId()));
+
+        return applicationMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
@@ -60,7 +77,7 @@ public class ApplicationService {
         Long userId = requireCurrentUserId();
         return applicationRepository
                 .findByApplicantUserIdOrderByAppliedAtDesc(userId, PageRequest.of(page, size))
-                .map(this::map);
+                .map(applicationMapper::toResponse);
     }
 
     // -----------------------------------------------------------------------
@@ -72,7 +89,7 @@ public class ApplicationService {
         log.info("Fetching applications for jobId={}", jobId);
         return applicationRepository
                 .findByJobIdOrderByAppliedAtDesc(jobId, PageRequest.of(page, size))
-                .map(this::map);
+                .map(applicationMapper::toResponse);
     }
 
     @Transactional("primaryTransactionManager")
@@ -81,10 +98,22 @@ public class ApplicationService {
         ApplicationStatus oldStatus = app.getStatus();
         log.info("Updating application id={} status {} -> {}", applicationId, oldStatus, req.status());
         app.setStatus(req.status());
-        ApplicationResponse response = map(applicationRepository.save(app));
+        ApplicationResponse response = applicationMapper.toResponse(applicationRepository.save(app));
 
         // Write audit record to secondary (MySQL) datasource
         writeAuditLog(applicationId, oldStatus, req.status());
+
+        // ── Async Kafka event — notify applicant of status change ─────────
+        kafkaPublisher.publish(new ApplicationEvent(
+                "APPLICATION_STATUS_CHANGED",
+                applicationId,
+                app.getJobId(),
+                app.getApplicantUserId(),
+                null,
+                oldStatus.name(),
+                req.status().name(),
+                LocalDateTime.now()
+        ), String.valueOf(applicationId));
 
         return response;
     }
@@ -95,7 +124,7 @@ public class ApplicationService {
 
     @Transactional(readOnly = true)
     public ApplicationResponse getById(Long id) {
-        return map(findOrThrow(id));
+        return applicationMapper.toResponse(findOrThrow(id));
     }
 
     // -----------------------------------------------------------------------
@@ -105,26 +134,6 @@ public class ApplicationService {
     private Application findOrThrow(Long id) {
         return applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found: " + id));
-    }
-
-    private ApplicationResponse map(Application app) {
-        List<ResumeResponse> resumes = app.getResumes() == null
-                ? List.of()
-                : app.getResumes().stream()
-                     .map(r -> new ResumeResponse(r.getId(), r.getOriginalFilename(),
-                                                  r.getS3Key(), r.getUploadedAt()))
-                     .toList();
-
-        return new ApplicationResponse(
-                app.getId(),
-                app.getJobId(),
-                app.getApplicantUserId(),
-                app.getStatus(),
-                app.getCoverLetter(),
-                resumes,
-                app.getAppliedAt(),
-                app.getUpdatedAt()
-        );
     }
 
     // -----------------------------------------------------------------------

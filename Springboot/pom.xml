@@ -25,11 +25,29 @@
         <module>job-service</module>
         <module>application-service</module>
         <module>api-gateway</module>
+        <module>eureka-server</module>
+        <module>notification-service</module>
     </modules>
     
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <spring-cloud.version>2024.0.1</spring-cloud.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     </properties>
+
+    <!-- Spring Cloud BOM — version-manages all spring-cloud-* artifacts for child modules -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

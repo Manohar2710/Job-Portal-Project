@@ -79,14 +79,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .build();
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
+                    // Use the numeric userId as the principal name so that
+                    // auth.getName() returns the Long id in every microservice.
+                    // Fall back to email if the claim is absent (old tokens).
+                    Long userId = jwtService.extractUserId(jwt);
+                    String principalName = (userId != null) ? String.valueOf(userId) : username;
+
+                    UserDetails principal = User.withUsername(principalName)
+                            .password("")
+                            .authorities(authorities)
+                            .build();
+
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, authorities);
+                                    principal, null, authorities);
                     authToken.setDetails(
                             new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("JWT validated — user: '{}', URI: [{} {}]",
-                            username, request.getMethod(), request.getRequestURI());
+                    log.debug("JWT validated — userId: '{}', user: '{}', URI: [{} {}]",
+                            principalName, username, request.getMethod(), request.getRequestURI());
                 }
             }
         } catch (JwtException ex) {

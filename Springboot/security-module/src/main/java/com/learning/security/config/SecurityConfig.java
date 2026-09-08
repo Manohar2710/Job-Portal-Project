@@ -58,9 +58,12 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/actuator/health/liveness",
                     "/actuator/health/readiness",
-                    "/actuator/info"
+                    "/actuator/info",
+                    "/actuator/metrics",        // ← add
+                    "/actuator/metrics/**",     // ← add
+                    "/actuator/prometheus"   
                 ).permitAll()
-                .requestMatchers("/actuator/**").authenticated()
+                // .requestMatchers("/actuator/**").authenticated()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

@@ -18,6 +18,9 @@ public record JobRequest(
         @Size(max = 255)
         String title,
 
+        // @NotNull(message = "Posted user info is required")
+        // Long postedBy,
+
         @NotBlank
         @Size(max = 2000)
         String description,

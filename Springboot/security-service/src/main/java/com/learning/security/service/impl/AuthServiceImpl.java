@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(user);
         log.info("User registered successfully, userId: {}", savedUser.getId());
 
-        String accessToken = jwtService.generateToken(savedUser);
+        String accessToken = jwtService.generateToken(savedUser, savedUser.getId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser);
         return buildResponse(savedUser, accessToken, refreshToken.getToken());
     }
@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("Login successful, userId: {}", user.getId());
 
-        String accessToken = jwtService.generateToken(user);
+        String accessToken = jwtService.generateToken(user, user.getId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
         return buildResponse(user, accessToken, refreshToken.getToken());
     }
@@ -93,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("Refresh token validated for userId: {}", user.getId());
 
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
-        String newAccessToken = jwtService.generateToken(user);
+        String newAccessToken = jwtService.generateToken(user, user.getId());
 
         log.info("Token rotated for userId: {}", user.getId());
         return buildResponse(user, newAccessToken, newRefreshToken.getToken());
