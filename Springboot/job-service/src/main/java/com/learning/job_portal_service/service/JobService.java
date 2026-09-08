@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.learning.common.exception.ResourceNotFoundException;
 import com.learning.job_portal_service.client.JobNotificationClient;
-import com.learning.job_portal_service.client.dto.NotificationRequest;
 import com.learning.job_portal_service.dto.JobRequest;
 import com.learning.job_portal_service.dto.JobResponse;
 import com.learning.job_portal_service.dto.JobSearchRequest;
@@ -59,25 +58,14 @@ public class JobService {
         applySkills(job, req.skills());
 
         Job saved = jobRepository.save(job);
-        log.info("Job created id={}", saved);
+        log.info("Job created id={}", saved.getId());
 
-        // ── Async notification via Kafka ──────────────────────────────────
-        // Published after the DB transaction commits; Kafka failure does NOT
-        // roll back the job creation.
+        // ── Async (Kafka) ─────────────────────────────────────────────────
+        // Fire-and-forget: notify all subscribers that a job was posted.
+        // notification-service, analytics-service, search-indexer etc. all
+        // consume this topic independently. The recruiter does NOT need to
+        // wait for notification delivery — this is a side-effect, not a result.
         kafkaPublisher.publish(buildJobEvent("JOB_POSTED", saved), String.valueOf(saved.getId()));
-
-        // ── Sync notification via Feign (Eureka) ─────────────────────────
-        // Best-effort direct call to notification-service via Eureka load-balancer.
-        // The fallback handles unavailability gracefully — job creation is unaffected.
-        if (currentUserId != null) {
-            notificationClient.createNotification(new NotificationRequest(
-                    currentUserId,
-                    "JOB_POSTED",
-                    "Job '" + saved.getTitle() + "' is now live!",
-                    "Your job posting at " + saved.getCompanyName() + " is active.",
-                    saved.getId()
-            ));
-        }
 
         return jobMapper.toResponse(saved);
     }
@@ -146,6 +134,36 @@ public class JobService {
         log.info("Fetching job id={}", id);
         jobRepository.incrementViewCount(id);
         return jobMapper.toResponse(findOrThrow(id));
+    }
+
+    /**
+     * Returns a job enriched with the recruiter's unread notification count.
+     *
+     * This is the canonical example of SYNCHRONOUS service-to-service communication:
+     * the caller NEEDS the notification count from notification-service to build
+     * the complete response — Kafka cannot help here because Kafka is fire-and-forget
+     * and cannot return data back to the caller.
+     *
+     * Flow:
+     *   1. Fetch the job from DB (this service's own data).
+     *   2. Call notification-service via Feign (Eureka lb://) to get the unread count.
+     *   3. Combine both into a single response — the client gets everything in one call.
+     *
+     * If notification-service is down, the fallback returns count=0 and the job
+     * detail is still returned successfully.
+     */
+    @Transactional(readOnly = true)
+    public JobWithNotificationCountResponse getByIdWithNotificationCount(Long id) {
+        log.info("Fetching job id={} with notification count (sync Feign call)", id);
+        JobResponse job = jobMapper.toResponse(findOrThrow(id));
+
+        // ── Sync call via Feign → notification-service ────────────────────
+        // This is the ONLY place Feign is used because we need the result NOW
+        // to include in our response. Kafka cannot do this.
+        long unreadCount = notificationClient.getUnreadCount().unread();
+        log.debug("Unread notification count for current user: {}", unreadCount);
+
+        return new JobWithNotificationCountResponse(job, unreadCount);
     }
 
     @Transactional(readOnly = true)
