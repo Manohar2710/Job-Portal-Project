@@ -3,6 +3,7 @@ package com.learning.job_portal_service.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -153,6 +154,7 @@ public class JobService {
      * If notification-service is down, the fallback returns count=0 and the job
      * detail is still returned successfully.
      */
+    @CircuitBreaker(name = "notificationService", fallbackMethod = "getByIdWithNotificationCountFallback")
     @Transactional(readOnly = true)
     public JobWithNotificationCountResponse getByIdWithNotificationCount(Long id) {
         log.info("Fetching job id={} with notification count (sync Feign call)", id);
@@ -165,6 +167,17 @@ public class JobService {
         log.debug("Unread notification count for current user: {}", unreadCount);
 
         return new JobWithNotificationCountResponse(job, unreadCount);
+    }
+
+    /**
+     * Circuit-breaker fallback for {@link #getByIdWithNotificationCount(Long)}.
+     * notification-service is down or the circuit is OPEN — return job with count=0
+     * so the caller still gets a useful response.
+     */
+    private JobWithNotificationCountResponse getByIdWithNotificationCountFallback(Long id, Throwable t) {
+        log.warn("Circuit OPEN for notificationService — returning job id={} with unreadCount=0: {}", id, t.getMessage());
+        JobResponse job = jobMapper.toResponse(findOrThrow(id));
+        return new JobWithNotificationCountResponse(job, 0L);
     }
 
     @Transactional(readOnly = true)

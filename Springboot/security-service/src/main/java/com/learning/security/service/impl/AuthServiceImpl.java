@@ -18,7 +18,6 @@ import com.learning.security.dto.RefreshTokenRequest;
 import com.learning.security.dto.RegisterRequest;
 import com.learning.security.entity.RefreshToken;
 import com.learning.security.entity.User;
-import com.learning.security.exception.TokenRefreshException;
 import com.learning.security.repository.UserRepository;
 import com.learning.security.service.AuthService;
 import com.learning.security.service.JwtService;

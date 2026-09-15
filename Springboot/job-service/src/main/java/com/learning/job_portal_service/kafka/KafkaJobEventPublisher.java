@@ -1,6 +1,7 @@
 package com.learning.job_portal_service.kafka;
 
 import com.learning.job_portal_service.kafka.event.JobEvent;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,7 @@ public class KafkaJobEventPublisher {
      * @param key   Kafka partition key — typically {@code String.valueOf(jobId)}
      *              so all events for one job land on the same partition (ordered)
      */
+    @CircuitBreaker(name = "kafkaPublisher", fallbackMethod = "publishFallback")
     public void publish(JobEvent event, String key) {
         CompletableFuture<SendResult<String, JobEvent>> future =
                 kafkaTemplate.send(jobEventsTopic, key, event);
@@ -53,5 +55,15 @@ public class KafkaJobEventPublisher {
                         result.getRecordMetadata().offset());
             }
         });
+    }
+
+    /**
+     * Fallback when the kafkaPublisher circuit is OPEN (Kafka is unreachable).
+     * The job DB transaction has already committed — this is a best-effort side-effect.
+     * Log the dropped event so it can be replayed manually or via an outbox pattern.
+     */
+    private void publishFallback(JobEvent event, String key, Throwable t) {
+        log.error("Circuit OPEN — dropped JobEvent type={} jobId={}: {}",
+                event.eventType(), event.jobId(), t.getMessage());
     }
 }

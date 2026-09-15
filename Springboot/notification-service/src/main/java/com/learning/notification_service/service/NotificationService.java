@@ -9,6 +9,7 @@ import com.learning.notification_service.kafka.event.ApplicationEvent;
 import com.learning.notification_service.kafka.event.JobEvent;
 import com.learning.notification_service.mapper.NotificationMapper;
 import com.learning.notification_service.repository.NotificationRepository;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,7 @@ public class NotificationService {
 
     // ── Kafka event handlers ───────────────────────────────────────────────────
 
+    @Retry(name = "notificationPersist", fallbackMethod = "handleJobEventFallback")
     @Transactional
     public void handleJobEvent(JobEvent event) {
         NotificationType type = resolveJobType(event.eventType());
@@ -60,6 +62,7 @@ public class NotificationService {
                 type, event.postedBy(), event.jobId());
     }
 
+    @Retry(name = "notificationPersist", fallbackMethod = "handleApplicationEventFallback")
     @Transactional
     public void handleApplicationEvent(ApplicationEvent event) {
         NotificationType type = resolveApplicationType(event.eventType());
@@ -92,6 +95,26 @@ public class NotificationService {
             log.info("Persisted APPLICATION_STATUS_CHANGED notification for applicant userId={}",
                     event.applicantUserId());
         }
+    }
+
+    // ── Retry fallbacks ────────────────────────────────────────────────────────
+
+    /**
+     * Called after all retry attempts for handleJobEvent are exhausted.
+     * Logs the failure; the Kafka offset will be committed so the partition
+     * is not blocked. Configure a dead-letter topic in production for replay.
+     */
+    private void handleJobEventFallback(JobEvent event, Throwable t) {
+        log.error("All retries exhausted for JobEvent jobId={} type={}: {}",
+                event.jobId(), event.eventType(), t.getMessage());
+    }
+
+    /**
+     * Called after all retry attempts for handleApplicationEvent are exhausted.
+     */
+    private void handleApplicationEventFallback(ApplicationEvent event, Throwable t) {
+        log.error("All retries exhausted for ApplicationEvent appId={} type={}: {}",
+                event.applicationId(), event.eventType(), t.getMessage());
     }
 
     // ── REST operations ────────────────────────────────────────────────────────

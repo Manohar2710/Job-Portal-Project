@@ -48,6 +48,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Resilience4j BOM — version-manages all resilience4j-* artifacts -->
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-bom</artifactId>
+                <version>2.3.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
