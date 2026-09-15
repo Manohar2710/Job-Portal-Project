@@ -99,6 +99,32 @@ security:
         allow-credentials: true
         max-age: 3600
 
+# ─── Resilience4j ─────────────────────────────────────────────────────────────
+resilience4j:
+
+  # Circuit breaker: wraps the Kafka publish call.
+  # Opens after 5 failures in a 10-call sliding window; waits 30 s before half-opening.
+  circuitbreaker:
+    instances:
+      kafkaPublisher:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50          # open after 50 % failures (5 / 10)
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indicator: true
+
+      # Circuit breaker: wraps the Feign call to notification-service.
+      # Feign already has a fallback bean, but the CB adds open-circuit short-circuit
+      # behaviour so we stop hammering a dead service immediately.
+      notificationService:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 20s
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indicator: true
+
 # ─── Actuator & Tracing ───────────────────────────────────────────────────────
 management:
     server:
@@ -109,7 +135,7 @@ management:
     endpoints:
         web:
             exposure:
-                include: health,info,metrics,prometheus
+                include: health,info,metrics,prometheus,circuitbreakers
             base-path: /actuator
     endpoint:
         health:
@@ -119,6 +145,9 @@ management:
     metrics:
         tags:
             application: ${spring.application.name}  # label every metric with the service name
+    health:
+        circuitbreakers:
+            enabled: true
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 logging:

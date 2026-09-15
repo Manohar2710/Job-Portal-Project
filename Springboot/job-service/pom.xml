@@ -145,6 +145,16 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
+        <!-- Resilience4j — circuit breaker + retry for Kafka publish & Feign calls -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- MapStruct — compile-time DTO/Entity mapper generation -->
         <dependency>
             <groupId>org.mapstruct</groupId>

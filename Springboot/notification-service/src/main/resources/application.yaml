@@ -81,14 +81,32 @@ app:
       job-events:         job-events
       application-events: application-events
 
+# ─── Resilience4j ─────────────────────────────────────────────────────────────
+resilience4j:
+
+  # Retry: wraps handleJobEvent / handleApplicationEvent DB persist calls.
+  # Retries up to 3 times with 500 ms fixed wait before calling the fallback.
+  retry:
+    instances:
+      notificationPersist:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.RecoverableDataAccessException
+          - java.net.SocketTimeoutException
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,retries
   endpoint:
     health:
       show-details: always
+  health:
+    retryevents:
+      enabled: true
 
 logging:
   level:
